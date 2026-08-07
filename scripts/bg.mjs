@@ -10,6 +10,7 @@
  *
  * Requires FAL_KEY in .env (get one at fal.ai). Cost is ~1–4¢/image.
  */
+import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
@@ -47,11 +48,36 @@ if (!existsSync(scriptPath)) {
 }
 const reel = JSON.parse(readFileSync(scriptPath, "utf8"));
 
-// On-brand default: an atmospheric golf scene that reads well *under* the dark
-// green scrim and cream text. No people/text so the overlay stays clean.
-const prompt =
-  promptOverride ??
-  `Cinematic atmospheric golf course photograph, deep fairway greens, soft morning light and mist, shallow depth of field, moody and minimal, lots of negative space, no people, no text, no logos. Themed loosely around: ${reel.hook}`;
+// On-brand fallback if prompt-authoring is unavailable.
+const fallbackPrompt = `Cinematic atmospheric golf course photograph, deep fairway greens, soft morning light and mist, shallow depth of field, moody and minimal, lots of negative space, no people, no text, no logos. Themed loosely around: ${reel.hook}`;
+
+// Ask Claude to theme the background to this specific tip (a putting tip gets a
+// green, a driving tip gets a tee box, etc.), on-brand and overlay-friendly.
+async function authorImagePrompt() {
+  try {
+    const client = new Anthropic(); // ANTHROPIC_API_KEY from .env
+    const res = await client.messages.create({
+      model: "claude-opus-4-8",
+      max_tokens: 400,
+      system:
+        "You write concise text-to-image prompts for Instagram Reel backgrounds for a golf tips brand called Bogey. Requirements: cinematic, atmospheric golf-course photography themed to the specific tip; deep fairway greens and warm natural light to sit under a dark-green brand scrim; strong negative space and shallow depth of field so overlaid text stays readable; absolutely no people, no text, no logos, no clubs mid-swing. Output ONLY the image prompt as one paragraph — no preamble, no quotes.",
+      messages: [
+        {
+          role: "user",
+          content: `Write a background image prompt themed to this golf tip.\n\nHook: ${reel.hook}\nBeats: ${reel.beats.join(" / ")}`,
+        },
+      ],
+    });
+    const text = res.content.find((b) => b.type === "text")?.text?.trim();
+    return text || null;
+  } catch (e) {
+    console.warn(`  (prompt authoring failed: ${e.message} — using default)`);
+    return null;
+  }
+}
+
+const prompt = promptOverride ?? (await authorImagePrompt()) ?? fallbackPrompt;
+console.log(`   prompt: ${prompt.slice(0, 120)}${prompt.length > 120 ? "…" : ""}`);
 
 // ---- fal.ai Flux (schnell = fast + cheap) ---------------------------------
 const model = process.env.FAL_MODEL ?? "fal-ai/flux/schnell";
