@@ -2,6 +2,7 @@ import React from "react";
 import {
   AbsoluteFill,
   Audio,
+  Img,
   interpolate,
   OffthreadVideo,
   Sequence,
@@ -17,16 +18,44 @@ import type { ReelProps } from "./schema";
 const resolveSrc = (src: string): string =>
   /^https?:\/\//.test(src) ? src : staticFile(src);
 
+const isImageSrc = (s: string): boolean => /\.(png|jpe?g|webp|gif|avif)$/i.test(s);
+
+/** A still image with a slow Ken-Burns zoom + pan, so it reads as motion. */
+const KenBurnsImage: React.FC<{ src: string }> = ({ src }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const scale = interpolate(frame, [0, durationInFrames], [1.12, 1.28], {
+    extrapolateRight: "clamp",
+  });
+  const shift = interpolate(frame, [0, durationInFrames], [-24, 24], {
+    extrapolateRight: "clamp",
+  });
+  return (
+    <Img
+      src={resolveSrc(src)}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        transform: `scale(${scale}) translateX(${shift}px)`,
+      }}
+    />
+  );
+};
+
 /** Fairway-green background with an optional b-roll layer + legibility scrim. */
 const Background: React.FC<{ brollSrc: string | null }> = ({ brollSrc }) => (
   <AbsoluteFill style={{ backgroundColor: BRAND.colors.green }}>
-    {brollSrc && (
-      <OffthreadVideo
-        src={resolveSrc(brollSrc)}
-        muted
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    )}
+    {brollSrc &&
+      (isImageSrc(brollSrc) ? (
+        <KenBurnsImage src={brollSrc} />
+      ) : (
+        <OffthreadVideo
+          src={resolveSrc(brollSrc)}
+          muted
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      ))}
     {/* Dark scrim keeps cream text readable over any footage. */}
     <AbsoluteFill
       style={{

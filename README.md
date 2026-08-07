@@ -54,6 +54,19 @@ npm run render:carousel -- your-chips-are-fat-because-you-scoop
 
 Slides land in `out/carousels/<slug>/01.png …` (1080×1350, 4:5) in swipe order.
 
+**Add an AI background** (fal.ai Flux → animated Ken-Burns b-roll behind the
+text):
+
+```bash
+npm run bg -- your-chips-are-fat-because-you-scoop
+npm run render -- scripts/your-chips-are-fat-because-you-scoop.json
+```
+
+`bg` saves the image to `public/broll/<slug>.png` and sets `brollSrc` on the
+script automatically; the renderer pans/zooms it behind the dark scrim. Needs
+`FAL_KEY` in `.env` (from [fal.ai](https://fal.ai); ~1–4¢/image). Pass
+`--prompt "…"` to override the auto golf-scene prompt.
+
 ## Scheduling & posting
 
 Queue approved, rendered Reels and auto-post them to Instagram:
