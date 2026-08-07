@@ -2,8 +2,9 @@ import React from "react";
 import { Composition } from "remotion";
 import { BogeyReel } from "./BogeyReel";
 import { ProfilePic } from "./ProfilePic";
+import { Carousel, carouselSlideCount } from "./Carousel";
 import { reelSchema, totalFrames, type ReelProps } from "./schema";
-import { VIDEO } from "./brand";
+import { BRAND, VIDEO } from "./brand";
 
 // A built-in example so Studio opens with something to look at.
 const EXAMPLE: ReelProps = {
@@ -15,7 +16,7 @@ const EXAMPLE: ReelProps = {
     "Ball should sit half above the crown.",
     "Free 15 yards. You're welcome.",
   ],
-  signoff: "Keep it in the short grass. — Bogey 🧢",
+  signoff: BRAND.signoff,
   brollSrc: null,
   audioSrc: null,
   hookSeconds: VIDEO.hookSeconds,
@@ -49,6 +50,22 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
         fps={1}
         durationInFrames={1}
+      />
+
+      {/* Swipeable carousel (one slide per frame) — render with:
+          npm run render:carousel -- <slug> */}
+      <Composition
+        id="Carousel"
+        component={Carousel}
+        schema={reelSchema}
+        defaultProps={EXAMPLE}
+        width={1080}
+        height={1350}
+        fps={1}
+        durationInFrames={carouselSlideCount(EXAMPLE.beats)}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: carouselSlideCount(props.beats),
+        })}
       />
     </>
   );

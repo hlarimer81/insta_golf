@@ -16,7 +16,7 @@ export const BRAND = {
     display: '"Arial Black", "Helvetica Neue", Arial, sans-serif',
     body: '"Helvetica Neue", Arial, sans-serif',
   },
-  signoff: "Keep it in the short grass. — Bogey 🧢",
+  signoff: "Keep it in the short grass. — Bogey",
 } as const;
 
 // Reel canvas + default pacing.

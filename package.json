@@ -10,6 +10,7 @@
     "review": "node scripts/review.mjs",
     "render": "node scripts/render.mjs",
     "profile": "remotion still ProfilePic out/bogey-profile.png",
+    "render:carousel": "node scripts/render-carousel.mjs",
     "schedule": "node scripts/schedule.mjs",
     "enqueue": "node scripts/enqueue.mjs",
     "stats": "node scripts/stats.mjs",

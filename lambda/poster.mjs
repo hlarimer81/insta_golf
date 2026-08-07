@@ -14,7 +14,7 @@
  */
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { makeS3, presignGet, getJson, putJson } from "../scripts/lib/s3.mjs";
-import { graphPublish } from "../scripts/lib/instagram.mjs";
+import { graphPublish, graphPublishCarousel } from "../scripts/lib/instagram.mjs";
 
 let cachedToken;
 async function getToken(region) {
@@ -54,23 +54,37 @@ export async function handler() {
   }
 
   const token = await getToken(region);
+  const igUser = process.env.IG_USER_ID;
+  const version = process.env.GRAPH_API_VERSION ?? "v21.0";
+  const ttl = parseInt(process.env.S3_URL_TTL ?? "3600", 10);
+  const presign = (key) => presignGet(s3, { bucket, key, ttl });
+
   let posted = 0;
   for (const e of due) {
     try {
-      const videoUrl = await presignGet(s3, {
-        bucket,
-        key: e.videoKey,
-        ttl: parseInt(process.env.S3_URL_TTL ?? "3600", 10),
-      });
-      const mediaId = await graphPublish({
-        igUser: process.env.IG_USER_ID,
-        token,
-        videoUrl,
-        caption: e.caption,
-        version: process.env.GRAPH_API_VERSION ?? "v21.0",
-        pollAttempts: parseInt(process.env.IG_POLL_ATTEMPTS ?? "24", 10),
-        pollIntervalMs: parseInt(process.env.IG_POLL_INTERVAL_MS ?? "10000", 10),
-      });
+      let mediaId;
+      if ((e.type ?? "reel") === "carousel") {
+        const imageUrls = [];
+        for (const key of e.mediaKeys) imageUrls.push(await presign(key));
+        mediaId = await graphPublishCarousel({
+          igUser,
+          token,
+          imageUrls,
+          caption: e.caption,
+          version,
+        });
+      } else {
+        const videoUrl = await presign(e.videoKey);
+        mediaId = await graphPublish({
+          igUser,
+          token,
+          videoUrl,
+          caption: e.caption,
+          version,
+          pollAttempts: parseInt(process.env.IG_POLL_ATTEMPTS ?? "24", 10),
+          pollIntervalMs: parseInt(process.env.IG_POLL_INTERVAL_MS ?? "10000", 10),
+        });
+      }
       e.status = "published";
       e.mediaId = mediaId;
       e.postedAt = new Date().toISOString();

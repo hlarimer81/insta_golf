@@ -45,6 +45,15 @@ npm run render scripts/stop-buying-a-new-driver.json   # just one
 
 Output lands in `out/<slug>.mp4` (1080×1920, H.264 — Instagram-ready).
 
+**Render a carousel** (a swipeable image post from the same script — cover →
+one slide per beat → save/follow CTA):
+
+```bash
+npm run render:carousel -- your-chips-are-fat-because-you-scoop
+```
+
+Slides land in `out/carousels/<slug>/01.png …` (1080×1350, 4:5) in swipe order.
+
 ## Scheduling & posting
 
 Queue approved, rendered Reels and auto-post them to Instagram:
@@ -111,6 +120,17 @@ baked in):
 ```bash
 npm run enqueue -- your-chips-are-fat-because-you-scoop --at 2026-08-10T09:00
 ```
+
+For a **carousel**, render the slides first, then enqueue with `--carousel`:
+
+```bash
+npm run render:carousel -- your-chips-are-fat-because-you-scoop
+npm run enqueue -- your-chips-are-fat-because-you-scoop --at 2026-08-10T09:00 --carousel
+```
+
+The daily poster handles both — Reels post as a video, carousels as a
+multi-image post. (After changing the poster, redeploy with
+`npm run build:lambda && sam deploy --profile deployer`.)
 
 **Check the queue** (⏳ pending / ✅ published / ❌ failed):
 
