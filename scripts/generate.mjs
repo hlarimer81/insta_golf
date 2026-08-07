@@ -93,6 +93,10 @@ carries the whole video. A script is:
 - beats: 3-5 sequential on-screen lines that pay off the hook. Each beat is ONE short line
   (a phone screen's width), timed to a b-roll cut. Build: problem -> the real cause -> the fix ->
   the payoff. Concrete and specific — real numbers, real body parts, real feel. No filler.
+- visuals: for each beat you may attach an animated diagram. The only diagram available is a
+  weight-distribution bar: {type:"weight", lead:<% of weight on the lead foot>}. Add it ONLY to a
+  beat that is specifically about weight on the lead foot / weight forward / ball position (e.g.
+  "Set 60% on your lead foot"). Every other beat is null. Most scripts have all nulls.
 
 Voice rules:
 - Talk like a caddie, not a coach. Plain words. Confident, a little dry, never smug.
@@ -120,8 +124,30 @@ const schema = {
             description: "3-5 short on-screen lines that pay off the hook",
             items: { type: "string" },
           },
+          visuals: {
+            type: "array",
+            description:
+              "One entry per beat, SAME length and order as beats. Use null for a normal beat. " +
+              "For a beat specifically about weight on the lead foot / weight forward / ball position, " +
+              "use {type:'weight', lead:<integer % of weight on the lead foot, e.g. 60>}. " +
+              "Diagrams are the exception — most entries are null.",
+            items: {
+              anyOf: [
+                { type: "null" },
+                {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    type: { type: "string", const: "weight" },
+                    lead: { type: "integer" },
+                  },
+                  required: ["type", "lead"],
+                },
+              ],
+            },
+          },
         },
-        required: ["slug", "hook", "beats"],
+        required: ["slug", "hook", "beats", "visuals"],
       },
     },
   },
@@ -189,10 +215,13 @@ for (const s of scripts) {
   }
   const slug = slugify(s.slug || s.hook);
   const outPath = uniqueDraftPath(slug);
+  const visuals = Array.isArray(s.visuals) ? s.visuals : [];
   const reel = {
     slug: slug,
     hook: s.hook,
     beats: s.beats,
+    // Only carry visuals when at least one beat has a diagram.
+    ...(visuals.some((v) => v) ? { visuals } : {}),
     brollSrc: null,
     audioSrc: null,
   };
