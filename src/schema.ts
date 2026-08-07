@@ -5,6 +5,18 @@ import { BRAND, VIDEO } from "./brand";
  * The shape of a single Reel "script". This is what the script generator
  * produces and what the renderer consumes — one JSON file per Reel.
  */
+/**
+ * Optional animated diagram shown with a beat. Aligned to `beats` by index
+ * (null = no diagram for that beat). Extend the union with new `type`s as we
+ * add diagram components.
+ */
+export const visualSchema = z
+  .object({
+    type: z.literal("weight"), // weight-distribution bar (lead vs trail foot)
+    lead: z.number().default(60), // % of weight on the lead foot
+  })
+  .nullable();
+
 export const reelSchema = z.object({
   // Internal label (also used for the output filename).
   slug: z.string().default("bogey-reel"),
@@ -14,6 +26,9 @@ export const reelSchema = z.object({
 
   // Sequential on-screen text beats, timed to b-roll cuts.
   beats: z.array(z.string()).min(1),
+
+  // Optional diagrams, one per beat (aligned by index; null = text only).
+  visuals: z.array(visualSchema).default([]),
 
   // Sign-off frame. Defaults to the Bogey signature.
   signoff: z.string().default(BRAND.signoff),

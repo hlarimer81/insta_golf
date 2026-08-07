@@ -53,7 +53,7 @@ const Wordmark: React.FC = () => (
       textShadow: "0 2px 12px rgba(0,0,0,0.5)",
     }}
   >
-    🧢 BOGEY
+    BOGEY
   </div>
 );
 
@@ -137,11 +137,91 @@ const TextCard: React.FC<{
   );
 };
 
+/** Animated weight-distribution bar (lead vs trail foot) — a golf diagram. */
+const WeightBar: React.FC<{ lead: number }> = ({ lead }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const enter = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 22 });
+  const fill = interpolate(enter, [0, 1], [50, lead]); // grow from even to target
+
+  return (
+    <div style={{ width: 620, marginTop: 64 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 18,
+          fontFamily: BRAND.fonts.body,
+          fontWeight: 800,
+          fontSize: 36,
+          color: BRAND.colors.cream,
+        }}
+      >
+        <span>LEAD {Math.round(fill)}%</span>
+        <span style={{ opacity: 0.55 }}>TRAIL {Math.round(100 - fill)}%</span>
+      </div>
+      <div
+        style={{
+          height: 40,
+          borderRadius: 999,
+          overflow: "hidden",
+          display: "flex",
+          background: "rgba(245,240,225,0.18)",
+        }}
+      >
+        <div style={{ width: `${fill}%`, backgroundColor: BRAND.colors.accent }} />
+      </div>
+    </div>
+  );
+};
+
+/** A beat that may carry an animated diagram beneath its text. */
+const BeatCard: React.FC<{
+  text: string;
+  visual: { type: "weight"; lead: number } | null;
+}> = ({ text, visual }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const enter = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 14 });
+  const y = interpolate(enter, [0, 1], [40, 0]);
+  const opacity = interpolate(enter, [0, 1], [0, 1]);
+
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 90px" }}>
+      <div
+        style={{
+          transform: `translateY(${y}px)`,
+          opacity,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: BRAND.fonts.display,
+            fontWeight: 900,
+            fontSize: visual ? 72 : 80,
+            lineHeight: 1.08,
+            color: BRAND.colors.cream,
+            textAlign: "center",
+            textShadow: "0 4px 24px rgba(0,0,0,0.6)",
+          }}
+        >
+          {text}
+        </div>
+        {visual?.type === "weight" && <WeightBar lead={visual.lead} />}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 export const BogeyReel: React.FC<ReelProps> = (props) => {
   const { fps } = useVideoConfig();
   const {
     hook,
     beats,
+    visuals,
     signoff,
     brollSrc,
     audioSrc,
@@ -169,14 +249,14 @@ export const BogeyReel: React.FC<ReelProps> = (props) => {
         <TextCard text={hook} fontSize={96} accentUnderline />
       </Sequence>
 
-      {/* Beats */}
+      {/* Beats (with an optional animated diagram) */}
       {beats.map((beat, i) => (
         <Sequence
           key={i}
           from={hookFrames + i * beatFrames}
           durationInFrames={beatFrames}
         >
-          <TextCard text={beat} fontSize={80} />
+          <BeatCard text={beat} visual={visuals?.[i] ?? null} />
         </Sequence>
       ))}
 
