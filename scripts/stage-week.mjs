@@ -16,6 +16,8 @@
  *                     Lambda cron fires at 13:00 UTC)
  *   --start-format reel|carousel   which format day 1 is (default reel);
  *                     alternates from there
+ *   --backgrounds     also generate an AI background per reel (needs FAL_KEY;
+ *                     costs ~1–4¢/image). Diagrams are automatic either way.
  *
  * Reuses the existing generate / render / render:carousel / enqueue tools, so
  * behavior stays identical to running them by hand.
@@ -49,6 +51,7 @@ const topic = opt("topic", "golf tips for weekend players: short game, putting, 
 const startArg = opt("start", null);
 const utcHour = parseInt(opt("utc-hour", "12"), 10);
 const startFormat = opt("start-format", "reel") === "carousel" ? "carousel" : "reel";
+const backgrounds = argv.includes("--backgrounds");
 
 // Run a child tool; inherit output unless quiet (then capture stderr for errors).
 function run(args, { quiet = false } = {}) {
@@ -123,6 +126,10 @@ for (const p of plan) {
     run(["scripts/render-carousel.mjs", p.slug], { quiet: true });
     run(["scripts/enqueue.mjs", p.slug, "--at", p.iso, "--carousel"]);
   } else {
+    if (backgrounds) {
+      console.log(`   🎨 background for ${p.slug}…`);
+      run(["scripts/bg.mjs", p.slug], { quiet: true });
+    }
     console.log(`   🎬 rendering ${p.slug}…`);
     run(["scripts/render.mjs", `scripts/${p.slug}.json`], { quiet: true });
     run(["scripts/enqueue.mjs", p.slug, "--at", p.iso]);

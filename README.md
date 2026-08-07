@@ -135,10 +135,13 @@ whatever's already scheduled:
 npm run stage:week                                   # 7 posts, next open week
 npm run stage:week -- --count 7 --topic "putting"    # themed week
 npm run stage:week -- --start 2026-09-01 --start-format carousel
+npm run stage:week -- --backgrounds                  # + AI background per reel
 ```
 
-This is the one-step way to top up. The commands below are the manual /
-granular equivalents.
+This is the one-step way to top up. Animated diagrams are added automatically by
+the generator when a beat is about weight/ball position; `--backgrounds` also
+generates a themed fal.ai background per reel (needs `FAL_KEY`). The commands
+below are the manual / granular equivalents.
 
 **Fill the cloud queue** (uploads the MP4 to S3 + appends to the queue, caption
 baked in):
