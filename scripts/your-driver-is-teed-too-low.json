@@ -1,0 +1,13 @@
+{
+  "slug": "your-driver-is-teed-too-low",
+  "hook": "Your driver's teed too low.",
+  "beats": [
+    "Half the ball peeking over the crown? Too low.",
+    "Low tee makes you hit down and spin it into the ground.",
+    "Tee it so half the ball sits ABOVE the top edge.",
+    "Now you catch it slightly on the up.",
+    "Same swing, twenty more yards of carry."
+  ],
+  "brollSrc": null,
+  "audioSrc": null
+}
