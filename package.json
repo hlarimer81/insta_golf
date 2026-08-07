@@ -13,6 +13,7 @@
     "render:carousel": "node scripts/render-carousel.mjs",
     "schedule": "node scripts/schedule.mjs",
     "enqueue": "node scripts/enqueue.mjs",
+    "stage:week": "node scripts/stage-week.mjs",
     "stats": "node scripts/stats.mjs",
     "build:lambda": "esbuild lambda/poster.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/poster.js",
     "render:raw": "remotion render",

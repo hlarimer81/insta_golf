@@ -114,6 +114,19 @@ generate → render → enqueue ─► S3 ◄─── EventBridge cron → Lamb
                                         queue.json + reels/*.mp4 → Graph API
 ```
 
+**Stage a whole week in one command** — generates scripts, renders them
+(Reels + carousels, interleaved), and enqueues them, auto-appending after
+whatever's already scheduled:
+
+```bash
+npm run stage:week                                   # 7 posts, next open week
+npm run stage:week -- --count 7 --topic "putting"    # themed week
+npm run stage:week -- --start 2026-09-01 --start-format carousel
+```
+
+This is the one-step way to top up. The commands below are the manual /
+granular equivalents.
+
 **Fill the cloud queue** (uploads the MP4 to S3 + appends to the queue, caption
 baked in):
 
