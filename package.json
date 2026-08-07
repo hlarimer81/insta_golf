@@ -5,11 +5,24 @@
   "private": true,
   "scripts": {
     "studio": "remotion studio",
+    "generate": "node scripts/generate.mjs",
+    "ig:setup": "node scripts/ig-setup.mjs",
+    "review": "node scripts/review.mjs",
     "render": "node scripts/render.mjs",
+    "profile": "remotion still ProfilePic out/bogey-profile.png",
+    "schedule": "node scripts/schedule.mjs",
+    "enqueue": "node scripts/enqueue.mjs",
+    "stats": "node scripts/stats.mjs",
+    "build:lambda": "esbuild lambda/poster.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/poster.js",
     "render:raw": "remotion render",
     "upgrade": "remotion upgrade"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@aws-sdk/client-s3": "^3.1105.0",
+    "@aws-sdk/client-secrets-manager": "^3.1106.0",
+    "@aws-sdk/client-sts": "^3.1105.0",
+    "@aws-sdk/s3-request-presigner": "^3.1105.0",
     "@remotion/cli": "4.0.507",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -18,6 +31,7 @@
   },
   "devDependencies": {
     "@types/react": "19.2.0",
+    "esbuild": "^0.28.1",
     "typescript": "5.9.3"
   }
 }

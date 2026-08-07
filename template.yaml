@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: insta-golf — daily Instagram Reels poster (EventBridge → Lambda → S3 + Graph API)
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: S3 bucket holding queue.json and reels/*.mp4 (your existing bucket)
+  IgUserId:
+    Type: String
+    Description: Instagram Business account ID
+  IgTokenSecretArn:
+    Type: String
+    Description: Secrets Manager ARN holding the IG access token (raw string or {"IG_ACCESS_TOKEN":"..."})
+  ScheduleExpression:
+    Type: String
+    Default: cron(0 14 * * ? *)
+    Description: When to post (UTC). Default 14:00 UTC (~9am US Eastern).
+
+Resources:
+  PosterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: poster.handler
+      Runtime: nodejs20.x
+      CodeUri: dist/
+      Timeout: 600
+      MemorySize: 256
+      Description: Posts the next due Reel from the S3 queue to Instagram
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref BucketName
+          IG_USER_ID: !Ref IgUserId
+          IG_TOKEN_SECRET: !Ref IgTokenSecretArn
+          CLOUD_QUEUE_KEY: queue.json
+          MAX_POSTS_PER_RUN: "1"
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref BucketName
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !Ref IgTokenSecretArn
+      Events:
+        Daily:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref ScheduleExpression
+            Description: insta-golf daily post
+
+Outputs:
+  PosterFunction:
+    Description: Poster Lambda function name
+    Value: !Ref PosterFunction

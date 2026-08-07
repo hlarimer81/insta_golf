@@ -1,6 +1,7 @@
 import React from "react";
 import { Composition } from "remotion";
 import { BogeyReel } from "./BogeyReel";
+import { ProfilePic } from "./ProfilePic";
 import { reelSchema, totalFrames, type ReelProps } from "./schema";
 import { VIDEO } from "./brand";
 
@@ -24,19 +25,31 @@ const EXAMPLE: ReelProps = {
 
 export const RemotionRoot: React.FC = () => {
   return (
-    <Composition
-      id="BogeyReel"
-      component={BogeyReel}
-      schema={reelSchema}
-      defaultProps={EXAMPLE}
-      fps={VIDEO.fps}
-      width={VIDEO.width}
-      height={VIDEO.height}
-      durationInFrames={totalFrames(EXAMPLE)}
-      // Recompute duration from whatever props/script are passed at render time.
-      calculateMetadata={({ props }) => ({
-        durationInFrames: totalFrames(props),
-      })}
-    />
+    <>
+      <Composition
+        id="BogeyReel"
+        component={BogeyReel}
+        schema={reelSchema}
+        defaultProps={EXAMPLE}
+        fps={VIDEO.fps}
+        width={VIDEO.width}
+        height={VIDEO.height}
+        durationInFrames={totalFrames(EXAMPLE)}
+        // Recompute duration from whatever props/script are passed at render time.
+        calculateMetadata={({ props }) => ({
+          durationInFrames: totalFrames(props),
+        })}
+      />
+
+      {/* Square brand avatar — render with:  npm run profile */}
+      <Composition
+        id="ProfilePic"
+        component={ProfilePic}
+        width={1080}
+        height={1080}
+        fps={1}
+        durationInFrames={1}
+      />
+    </>
   );
 };
