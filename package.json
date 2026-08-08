@@ -12,6 +12,7 @@
     "profile": "remotion still ProfilePic out/bogey-profile.png",
     "render:carousel": "node scripts/render-carousel.mjs",
     "bg": "node scripts/bg.mjs",
+    "refresh:bg": "node scripts/refresh-backgrounds.mjs",
     "schedule": "node scripts/schedule.mjs",
     "enqueue": "node scripts/enqueue.mjs",
     "stage:week": "node scripts/stage-week.mjs",

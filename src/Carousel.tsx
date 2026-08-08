@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
 import { BRAND } from "./brand";
 import type { ReelProps } from "./schema";
 
@@ -10,12 +10,16 @@ import type { ReelProps } from "./schema";
  *   slide N        sign-off + save/follow CTA
  *
  * Portrait 4:5 (1080×1350). Each FRAME is one slide, so a still render at
- * --frame=N produces slide N. Total slides = beats.length + 2.
+ * --frame=N produces slide N. Total slides = beats.length + 2. An optional
+ * brollSrc image is drawn behind every slide under a strong scrim.
  */
 
 export const carouselSlideCount = (beats: string[]): number => beats.length + 2;
 
 const PAD = 96;
+const resolveSrc = (src: string): string =>
+  /^https?:\/\//.test(src) ? src : staticFile(src);
+const isImageSrc = (s: string): boolean => /\.(png|jpe?g|webp|gif|avif)$/i.test(s);
 
 const Wordmark: React.FC = () => (
   <div
@@ -35,23 +39,43 @@ const Wordmark: React.FC = () => (
   </div>
 );
 
-const Slide: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AbsoluteFill
-    style={{
-      backgroundColor: BRAND.colors.green,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: `0 ${PAD}px`,
-      textAlign: "center",
-    }}
-  >
-    <Wordmark />
-    {children}
+const Slide: React.FC<{ children: React.ReactNode; brollSrc?: string | null }> = ({
+  children,
+  brollSrc,
+}) => (
+  <AbsoluteFill style={{ backgroundColor: BRAND.colors.green }}>
+    {/* Background layer: image + strong scrim (carousels are text-heavy). */}
+    {brollSrc && isImageSrc(brollSrc) && (
+      <AbsoluteFill>
+        <Img
+          src={resolveSrc(brollSrc)}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+        <AbsoluteFill
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(11,61,46,0.66) 0%, rgba(11,61,46,0.58) 45%, rgba(11,61,46,0.78) 100%)",
+          }}
+        />
+      </AbsoluteFill>
+    )}
+    {/* Content layer sits above the background. */}
+    <AbsoluteFill
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        padding: `0 ${PAD}px`,
+        textAlign: "center",
+      }}
+    >
+      <Wordmark />
+      {children}
+    </AbsoluteFill>
   </AbsoluteFill>
 );
 
-const Cover: React.FC<{ hook: string }> = ({ hook }) => (
-  <Slide>
+const Cover: React.FC<{ hook: string; brollSrc?: string | null }> = ({ hook, brollSrc }) => (
+  <Slide brollSrc={brollSrc}>
     <div
       style={{
         fontFamily: BRAND.fonts.display,
@@ -89,12 +113,13 @@ const Cover: React.FC<{ hook: string }> = ({ hook }) => (
   </Slide>
 );
 
-const Beat: React.FC<{ text: string; index: number; total: number }> = ({
-  text,
-  index,
-  total,
-}) => (
-  <Slide>
+const Beat: React.FC<{
+  text: string;
+  index: number;
+  total: number;
+  brollSrc?: string | null;
+}> = ({ text, index, total, brollSrc }) => (
+  <Slide brollSrc={brollSrc}>
     <div
       style={{
         position: "absolute",
@@ -124,8 +149,8 @@ const Beat: React.FC<{ text: string; index: number; total: number }> = ({
   </Slide>
 );
 
-const CTA: React.FC<{ signoff: string }> = ({ signoff }) => (
-  <Slide>
+const CTA: React.FC<{ signoff: string; brollSrc?: string | null }> = ({ signoff, brollSrc }) => (
+  <Slide brollSrc={brollSrc}>
     <div
       style={{
         fontFamily: BRAND.fonts.display,
@@ -160,14 +185,14 @@ const CTA: React.FC<{ signoff: string }> = ({ signoff }) => (
   </Slide>
 );
 
-export const Carousel: React.FC<ReelProps> = ({ hook, beats, signoff }) => {
+export const Carousel: React.FC<ReelProps> = ({ hook, beats, signoff, brollSrc }) => {
   const frame = useCurrentFrame();
   const slides = [
-    <Cover key="cover" hook={hook} />,
+    <Cover key="cover" hook={hook} brollSrc={brollSrc} />,
     ...beats.map((b, i) => (
-      <Beat key={i} text={b} index={i} total={beats.length} />
+      <Beat key={i} text={b} index={i} total={beats.length} brollSrc={brollSrc} />
     )),
-    <CTA key="cta" signoff={signoff} />,
+    <CTA key="cta" signoff={signoff} brollSrc={brollSrc} />,
   ];
   return slides[Math.min(frame, slides.length - 1)];
 };
