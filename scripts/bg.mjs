@@ -4,6 +4,7 @@
  *
  *   npm run bg -- <slug>
  *   npm run bg -- <slug> --prompt "moody links course at dawn, fog on the fairway"
+ *   npm run bg -- <slug> --ratio 4:5     # portrait crop for carousels / memes
  *
  * Saves the image to public/broll/<slug>.png, sets brollSrc on the script, then
  * `npm run render -- scripts/<slug>.json` bakes it behind the text (Ken-Burns).
@@ -36,10 +37,14 @@ const args = process.argv.slice(2);
 const slug = args.find((a) => !a.startsWith("--"));
 const pIdx = args.indexOf("--prompt");
 const promptOverride = pIdx >= 0 ? args[pIdx + 1] : null;
+const rIdx = args.indexOf("--ratio");
+const ratio = rIdx >= 0 ? args[rIdx + 1] : "9:16";
 if (!slug) {
-  console.error("Usage: npm run bg -- <slug> [--prompt \"...\"]");
+  console.error("Usage: npm run bg -- <slug> [--prompt \"...\"] [--ratio 9:16|4:5]");
   process.exit(1);
 }
+// fal's closest supported sizes to the two canvases we render.
+const imageSize = ratio === "4:5" ? "portrait_4_3" : "portrait_16_9";
 
 const scriptPath = join(scriptsDir, `${slug}.json`);
 if (!existsSync(scriptPath)) {
@@ -48,23 +53,36 @@ if (!existsSync(scriptPath)) {
 }
 const reel = JSON.parse(readFileSync(scriptPath, "utf8"));
 
-// On-brand fallback if prompt-authoring is unavailable.
-const fallbackPrompt = `Cinematic atmospheric golf course photograph, deep fairway greens, soft morning light and mist, shallow depth of field, moody and minimal, lots of negative space, no people, no text, no logos. Themed loosely around: ${reel.hook}`;
+const isJoke = reel.kind === "joke";
 
-// Ask Claude to theme the background to this specific tip (a putting tip gets a
-// green, a driving tip gets a tee box, etc.), on-brand and overlay-friendly.
+// On-brand fallback if prompt-authoring is unavailable.
+const fallbackPrompt = isJoke
+  ? `Wry photographic golf still life, deep greens and warm natural light, shallow depth of field, empty space top and bottom of frame, no people, no text, no logos. Themed loosely around: ${reel.hook}`
+  : `Cinematic atmospheric golf course photograph, deep fairway greens, soft morning light and mist, shallow depth of field, moody and minimal, lots of negative space, no people, no text, no logos. Themed loosely around: ${reel.hook}`;
+
+// Ask Claude to theme the background to this specific script, on-brand and
+// overlay-friendly: a tip gets a clean cinematic course (a putting tip gets a
+// green, a driving tip a tee box), a joke gets the situation it's about (the
+// ball in the water, the empty range bucket) — photographic and text-free
+// either way, so the words on top do the work.
+const TIP_PROMPT_SYSTEM =
+  "You write concise text-to-image prompts for Instagram Reel backgrounds for a golf tips brand called Bogey. Requirements: cinematic, atmospheric golf-course photography themed to the specific tip; deep fairway greens and warm natural light to sit under a dark-green brand scrim; strong negative space and shallow depth of field so overlaid text stays readable; absolutely no people, no text, no logos, no clubs mid-swing. Output ONLY the image prompt as one paragraph — no preamble, no quotes.";
+const JOKE_PROMPT_SYSTEM =
+  "You write concise text-to-image prompts for Instagram meme backgrounds for a golf humor brand called Bogey. Requirements: photographic, slightly wry still-life of the SITUATION the joke is about (a ball plugged in a bunker, a ball floating at the edge of a pond, a beaten-up range bucket, a cart path at dusk); deep greens and warm natural light to sit under a dark-green brand scrim; large empty areas at the top and bottom of the frame so overlaid text stays readable; absolutely no people, no text, no logos, no cartoons. Output ONLY the image prompt as one paragraph — no preamble, no quotes.";
+
 async function authorImagePrompt() {
   try {
     const client = new Anthropic(); // ANTHROPIC_API_KEY from .env
     const res = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 400,
-      system:
-        "You write concise text-to-image prompts for Instagram Reel backgrounds for a golf tips brand called Bogey. Requirements: cinematic, atmospheric golf-course photography themed to the specific tip; deep fairway greens and warm natural light to sit under a dark-green brand scrim; strong negative space and shallow depth of field so overlaid text stays readable; absolutely no people, no text, no logos, no clubs mid-swing. Output ONLY the image prompt as one paragraph — no preamble, no quotes.",
+      system: isJoke ? JOKE_PROMPT_SYSTEM : TIP_PROMPT_SYSTEM,
       messages: [
         {
           role: "user",
-          content: `Write a background image prompt themed to this golf tip.\n\nHook: ${reel.hook}\nBeats: ${reel.beats.join(" / ")}`,
+          content: isJoke
+            ? `Write a background image prompt for this golf joke.\n\nSetup: ${reel.hook}\nBeats: ${reel.beats.join(" / ")}\nPunchline: ${reel.punchline ?? ""}`
+            : `Write a background image prompt themed to this golf tip.\n\nHook: ${reel.hook}\nBeats: ${reel.beats.join(" / ")}`,
         },
       ],
     });
@@ -91,7 +109,7 @@ const res = await fetch(`https://fal.run/${model}`, {
   },
   body: JSON.stringify({
     prompt,
-    image_size: "portrait_16_9", // 9:16 portrait, matches the Reel canvas
+    image_size: imageSize, // 9:16 for Reels, 4:5-ish for carousels + memes
     num_images: 1,
     enable_safety_checker: true,
   }),

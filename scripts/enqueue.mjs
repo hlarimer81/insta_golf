@@ -4,10 +4,13 @@
  *
  *   npm run enqueue -- <slug> --at 2026-08-10T09:00              # queue a Reel
  *   npm run enqueue -- <slug> --at 2026-08-10T09:00 --carousel   # queue a carousel
+ *   npm run enqueue -- <slug> --at 2026-08-10T09:00 --meme       # queue a meme
  *   npm run enqueue -- list                                      # show the queue
+ *   npm run enqueue -- remove <slug> [--type meme]               # unqueue it
  *
  * Adding uploads the media to S3 and appends an entry (caption baked in).
- * Reels use out/<slug>.mp4; carousels use out/carousels/<slug>/*.png.
+ * Reels use out/<slug>.mp4; carousels use out/carousels/<slug>/*.png;
+ * memes use out/memes/<slug>.png.
  * Per the no-review model, add skips the review gate — it only requires that
  * the media is rendered. Reads AWS creds/config from .env.
  */
@@ -44,6 +47,8 @@ const s3 = makeS3(region);
 const args = process.argv.slice(2);
 if (args[0] === "list") {
   await cmdList();
+} else if (args[0] === "remove") {
+  await cmdRemove(args.slice(1));
 } else {
   await cmdAdd(args);
 }
@@ -55,9 +60,10 @@ async function cmdList() {
     return;
   }
   const icon = { pending: "⏳", published: "✅", failed: "❌" };
+  const typeIcon = { carousel: "🎠", meme: "😄", reel: "🎬" };
   const sorted = [...queue.entries].sort((a, b) => a.publishAt.localeCompare(b.publishAt));
   for (const e of sorted) {
-    const kind = (e.type ?? "reel") === "carousel" ? "🎠" : "🎬";
+    const kind = typeIcon[e.type ?? "reel"] ?? "🎬";
     const extra = e.mediaId ? `  media ${e.mediaId}` : e.error ? `  (${e.error})` : "";
     console.log(`${icon[e.status] ?? "•"} ${kind} ${e.publishAt}  ${e.slug}${extra}`);
   }
@@ -70,9 +76,52 @@ async function cmdList() {
   );
 }
 
+// Drop pending entries from the queue (e.g. to re-stage a post in another
+// format). Published entries are left alone — they're the posting record.
+async function cmdRemove(args) {
+  const slug = args.find((a) => !a.startsWith("--"));
+  const tIdx = args.indexOf("--type");
+  const type = tIdx >= 0 ? args[tIdx + 1] : null;
+  if (!slug) {
+    console.error("Usage: npm run enqueue -- remove <slug> [--type reel|carousel|meme]");
+    process.exit(1);
+  }
+
+  const queue = await getJson(s3, { bucket, key: queueKey });
+  if (!queue?.entries?.length) {
+    console.error("Cloud queue is empty.");
+    process.exit(1);
+  }
+
+  const doomed = queue.entries.filter(
+    (e) => e.slug === slug && (!type || (e.type ?? "reel") === type) && e.status !== "published",
+  );
+  if (doomed.length === 0) {
+    const published = queue.entries.some((e) => e.slug === slug && e.status === "published");
+    console.error(
+      published
+        ? `"${slug}" is already published — leaving it in the queue as the posting record.`
+        : `Nothing pending matches "${slug}"${type ? ` (type ${type})` : ""}.`,
+    );
+    process.exit(1);
+  }
+
+  queue.entries = queue.entries.filter((e) => !doomed.includes(e));
+  await putJson(s3, { bucket, key: queueKey, data: queue });
+  for (const e of doomed) {
+    console.log(`🗑  Removed ${e.type ?? "reel"} "${e.slug}" (was ${e.publishAt})`);
+  }
+  console.log(`   ${queue.entries.length} entries left in s3://${bucket}/${queueKey}`);
+}
+
 async function cmdAdd(args) {
   const isCarousel = args.includes("--carousel");
-  const rest = args.filter((a) => a !== "--carousel");
+  const isMeme = args.includes("--meme");
+  if (isCarousel && isMeme) {
+    console.error("Pass either --carousel or --meme, not both.");
+    process.exit(1);
+  }
+  const rest = args.filter((a) => a !== "--carousel" && a !== "--meme");
   const [slug, ...flags] = rest;
   let at;
   for (let i = 0; i < flags.length; i++) {
@@ -81,7 +130,7 @@ async function cmdAdd(args) {
   if (!slug || !at) {
     console.error(
       "Usage:\n" +
-        "  npm run enqueue -- <slug> --at <ISO> [--carousel]\n" +
+        "  npm run enqueue -- <slug> --at <ISO> [--carousel | --meme]\n" +
         "  npm run enqueue -- list",
     );
     process.exit(1);
@@ -103,7 +152,7 @@ async function cmdAdd(args) {
   // Upload the media and build the type-specific fields.
   const entry = {
     slug,
-    type: isCarousel ? "carousel" : "reel",
+    type: isCarousel ? "carousel" : isMeme ? "meme" : "reel",
     publishAt: when.toISOString(),
     status: "pending",
     caption,
@@ -133,6 +182,18 @@ async function cmdAdd(args) {
       });
       entry.mediaKeys.push(key);
     }
+  } else if (isMeme) {
+    const imagePath = join(outDir, "memes", `${slug}.png`);
+    if (!existsSync(imagePath)) {
+      console.error(
+        `Not rendered: out/memes/${slug}.png — run "npm run render:meme -- ${slug}" first.`,
+      );
+      process.exit(1);
+    }
+    const key = `memes/${slug}.png`;
+    console.log(`Uploading out/memes/${slug}.png → s3://${bucket}/${key} …`);
+    await uploadFile(s3, { bucket, key, path: imagePath, contentType: "image/png" });
+    entry.imageKey = key;
   } else {
     const videoPath = join(outDir, `${slug}.mp4`);
     if (!existsSync(videoPath)) {

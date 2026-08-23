@@ -1,0 +1,26 @@
+{
+  "slug": "you-hit-down-on-your-driver",
+  "kind": "tip",
+  "hook": "You hit down on your driver like it's an iron.",
+  "beats": [
+    "Steep contact skies it and kills your distance.",
+    "The driver's the one club you hit on the up.",
+    "Ball off your lead heel, tee it high.",
+    "Set a touch more weight on your back foot at address.",
+    "Now you catch it rising and it carries.",
+    "Same speed, twenty more yards."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 45
+    },
+    null,
+    null,
+    null
+  ],
+  "brollSrc": "broll/you-hit-down-on-your-driver.png",
+  "audioSrc": null
+}

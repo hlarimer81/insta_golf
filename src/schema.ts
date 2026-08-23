@@ -21,7 +21,13 @@ export const reelSchema = z.object({
   // Internal label (also used for the output filename).
   slug: z.string().default("bogey-reel"),
 
+  // What kind of post this is. "tip" is a coaching script (Reel or carousel);
+  // "joke" is golf humor (joke Reel or single-image meme). Same file shape —
+  // the renderer just leans on `punchline` and skips the teaching framing.
+  kind: z.enum(["tip", "joke"]).default("tip"),
+
   // The 0–1s hook frame. This is 90% of whether the Reel works.
+  // On a joke, this is the setup line.
   hook: z.string(),
 
   // Sequential on-screen text beats, timed to b-roll cuts.
@@ -29,6 +35,10 @@ export const reelSchema = z.object({
 
   // Optional diagrams, one per beat (aligned by index; null = text only).
   visuals: z.array(visualSchema).default([]),
+
+  // The payoff line on a joke: held after the beats in a Reel, and the bottom
+  // line of a meme. null on tips.
+  punchline: z.string().nullable().default(null),
 
   // Sign-off frame. Defaults to the Bogey signature.
   signoff: z.string().default(BRAND.signoff),
@@ -43,6 +53,7 @@ export const reelSchema = z.object({
   // Pacing overrides (seconds).
   hookSeconds: z.number().default(VIDEO.hookSeconds),
   secondsPerBeat: z.number().default(VIDEO.secondsPerBeat),
+  punchSeconds: z.number().default(VIDEO.punchSeconds),
   signoffSeconds: z.number().default(VIDEO.signoffSeconds),
 });
 
@@ -51,6 +62,9 @@ export type ReelProps = z.infer<typeof reelSchema>;
 /** Total frames for a given script, derived from pacing + beat count. */
 export const totalFrames = (p: ReelProps): number => {
   const secs =
-    p.hookSeconds + p.beats.length * p.secondsPerBeat + p.signoffSeconds;
+    p.hookSeconds +
+    p.beats.length * p.secondsPerBeat +
+    (p.punchline ? p.punchSeconds : 0) +
+    p.signoffSeconds;
   return Math.ceil(secs * VIDEO.fps);
 };

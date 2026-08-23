@@ -54,6 +54,15 @@ npm run render:carousel -- your-chips-are-fat-because-you-scoop
 
 Slides land in `out/carousels/<slug>/01.png …` (1080×1350, 4:5) in swipe order.
 
+**Render a meme** (a single-image joke post — setup on top, punchline on the
+bottom — from a `--kind joke` script):
+
+```bash
+npm run render:meme -- the-provisional-goes-straight
+```
+
+Lands in `out/memes/<slug>.png` (1080×1350, 4:5).
+
 **Add an AI background** (fal.ai Flux → animated Ken-Burns b-roll behind the
 text):
 
@@ -65,7 +74,10 @@ npm run render -- scripts/your-chips-are-fat-because-you-scoop.json
 `bg` saves the image to `public/broll/<slug>.png` and sets `brollSrc` on the
 script automatically; the renderer pans/zooms it behind the dark scrim. Needs
 `FAL_KEY` in `.env` (from [fal.ai](https://fal.ai); ~1–4¢/image). Pass
-`--prompt "…"` to override the auto golf-scene prompt.
+`--prompt "…"` to override the auto golf-scene prompt, or `--ratio 4:5` for a
+carousel/meme-shaped image instead of the 9:16 Reel crop. The prompt is themed
+to the script: a tip gets a clean cinematic course, a joke gets the situation
+it's about.
 
 ## Scheduling & posting
 
@@ -128,20 +140,27 @@ generate → render → enqueue ─► S3 ◄─── EventBridge cron → Lamb
 ```
 
 **Stage a whole week in one command** — generates scripts, renders them
-(Reels + carousels, interleaved), and enqueues them, auto-appending after
-whatever's already scheduled:
+(Reels, carousels, and memes, interleaved), and enqueues them, auto-appending
+after whatever's already scheduled:
 
 ```bash
 npm run stage:week                                   # 7 posts, next open week
-npm run stage:week -- --count 7 --topic "putting"    # themed week
+npm run stage:week -- --count 14 --backgrounds       # two weeks + AI backgrounds
+npm run stage:week -- --count 7 --humor 0 --topic "putting"   # tips only
 npm run stage:week -- --start 2026-09-01 --start-format carousel
-npm run stage:week -- --backgrounds                  # + AI background per reel
 ```
+
+By default **half the run is humor**, spread evenly through it: tips alternate
+Reel ↔ carousel, jokes alternate joke Reel ↔ meme, and day 1 is a tip. So a
+14-day run comes out as 4 tip Reels, 3 carousels, 4 joke Reels, and 3 memes.
+Use `--humor N` to change the split (`--humor 0` for tips only) and
+`--humor-topic "…"` to steer the jokes.
 
 This is the one-step way to top up. Animated diagrams are added automatically by
 the generator when a beat is about weight/ball position; `--backgrounds` also
-generates a themed fal.ai background per reel (needs `FAL_KEY`). The commands
-below are the manual / granular equivalents.
+generates a themed fal.ai background per post — 9:16 for Reels, 4:5 for
+carousels and memes (needs `FAL_KEY`). The commands below are the manual /
+granular equivalents.
 
 **Fill the cloud queue** (uploads the MP4 to S3 + appends to the queue, caption
 baked in):
@@ -157,9 +176,16 @@ npm run render:carousel -- your-chips-are-fat-because-you-scoop
 npm run enqueue -- your-chips-are-fat-because-you-scoop --at 2026-08-10T09:00 --carousel
 ```
 
-The daily poster handles both — Reels post as a video, carousels as a
-multi-image post. (After changing the poster, redeploy with
-`npm run build:lambda && sam deploy --profile deployer`.)
+For a **meme**, render the image first, then enqueue with `--meme`:
+
+```bash
+npm run render:meme -- the-provisional-goes-straight
+npm run enqueue -- the-provisional-goes-straight --at 2026-08-10T09:00 --meme
+```
+
+The daily poster handles all three — Reels post as a video, carousels as a
+multi-image post, memes as a single image. (After changing the poster, redeploy
+with `npm run build:lambda && sam deploy --profile deployer`.)
 
 **Check the queue** (⏳ pending / ✅ published / ❌ failed):
 
@@ -214,7 +240,13 @@ Let Bogey write the scripts for you. This calls Claude and drops finished
 npm run generate                          # 5 scripts, general golf tips
 npm run generate -- "fixing a slice"      # 5 scripts on a topic
 npm run generate -- --count 8 "putting"   # 8 scripts on a topic
+npm run generate -- --kind joke "bunkers" # 5 golf jokes instead of tips
 ```
+
+`--kind joke` writes humor instead of coaching: a setup (`hook`), 2–3 escalating
+`beats`, and a `punchline`. One joke script feeds two formats — a joke Reel
+(setup → beats → punchline, held long) and a single-image meme (setup →
+punchline only), so both lines have to land on their own.
 
 It reads existing scripts and won't repeat their hooks, and never overwrites a
 file (colliding slugs become `slug-2`, `slug-3`, …).
@@ -259,10 +291,18 @@ Prefer to write one by hand? One JSON file per Reel in `scripts/`. Minimal examp
 }
 ```
 
-Optional fields: `signoff` (defaults to the Bogey signature), `brollSrc` and
-`audioSrc` (a URL, or a path under `public/broll` / `public/audio`), and pacing
-overrides `hookSeconds` / `secondsPerBeat` / `signoffSeconds`. Full shape and
-defaults live in `src/schema.ts`.
+Optional fields: `kind` (`"tip"`, the default, or `"joke"`), `punchline` (the
+payoff line on a joke — held after the beats in a Reel, and the bottom line of a
+meme), `signoff` (defaults to the Bogey signature), `brollSrc` and `audioSrc` (a
+URL, or a path under `public/broll` / `public/audio`), and pacing overrides
+`hookSeconds` / `secondsPerBeat` / `punchSeconds` / `signoffSeconds`. Full shape
+and defaults live in `src/schema.ts`.
+
+Default pacing is deliberately unhurried — 3s on the hook, 3s per beat, 4s on a
+punchline, 2.5s on the sign-off — so every card is readable without pausing. A
+4-beat tip Reel runs ~17.5s. Change it once in `VIDEO` in `src/brand.ts`; it
+applies to everything rendered afterwards (already-rendered MP4s keep their old
+pacing).
 
 ## Brand kit
 

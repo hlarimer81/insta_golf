@@ -3,9 +3,20 @@
  * local CLI and the cloud Lambda can import them cheaply.
  */
 
-/** Build a post caption from a reel. An explicit `caption` field wins. */
+/** Build a post caption from a script. An explicit `caption` field wins. */
 export function buildCaption(reel) {
   if (reel.caption && reel.caption.trim()) return reel.caption.trim();
+  if (reel.kind === "joke") {
+    // Jokes read as setup → punchline. The escalation beats are on-screen
+    // timing, not caption copy, so they'd only spoil the pace here.
+    const hashtags = (
+      process.env.IG_HASHTAGS_HUMOR ||
+      "#golf #golfmemes #golfhumor #golflife #golfproblems"
+    ).trim();
+    return [reel.hook, "", reel.punchline ?? "", "", hashtags]
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n");
+  }
   const hashtags = (
     process.env.IG_HASHTAGS || "#golf #golftips #golfswing #golflife #golftok"
   ).trim();
@@ -67,6 +78,28 @@ export async function graphPublish({
   const container = await post(`${igUser}/media`, {
     media_type: "REELS",
     video_url: videoUrl,
+    caption,
+  });
+  await waitForFinished(get, container.id, pollAttempts, pollIntervalMs);
+  const published = await post(`${igUser}/media_publish`, {
+    creation_id: container.id,
+  });
+  return published.id;
+}
+
+/** Publish a single image post (a meme): create container → wait → publish. */
+export async function graphPublishImage({
+  igUser,
+  token,
+  imageUrl,
+  caption,
+  version = "v21.0",
+  pollAttempts = 20,
+  pollIntervalMs = 5000,
+}) {
+  const { post, get } = graphClient(token, version);
+  const container = await post(`${igUser}/media`, {
+    image_url: imageUrl,
     caption,
   });
   await waitForFinished(get, container.id, pollAttempts, pollIntervalMs);

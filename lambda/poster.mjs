@@ -14,7 +14,11 @@
  */
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { makeS3, presignGet, getJson, putJson } from "../scripts/lib/s3.mjs";
-import { graphPublish, graphPublishCarousel } from "../scripts/lib/instagram.mjs";
+import {
+  graphPublish,
+  graphPublishCarousel,
+  graphPublishImage,
+} from "../scripts/lib/instagram.mjs";
 
 let cachedToken;
 async function getToken(region) {
@@ -63,7 +67,16 @@ export async function handler() {
   for (const e of due) {
     try {
       let mediaId;
-      if ((e.type ?? "reel") === "carousel") {
+      const type = e.type ?? "reel";
+      if (type === "meme") {
+        mediaId = await graphPublishImage({
+          igUser,
+          token,
+          imageUrl: await presign(e.imageKey),
+          caption: e.caption,
+          version,
+        });
+      } else if (type === "carousel") {
         const imageUrls = [];
         for (const key of e.mediaKeys) imageUrls.push(await presign(key));
         mediaId = await graphPublishCarousel({

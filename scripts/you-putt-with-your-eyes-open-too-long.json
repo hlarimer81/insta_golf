@@ -1,0 +1,14 @@
+{
+  "slug": "you-putt-with-your-eyes-open-too-long",
+  "kind": "tip",
+  "hook": "You stare at the hole while you putt. Stop.",
+  "beats": [
+    "You keep peeking to see where it's going.",
+    "That opens your shoulders and pushes the putt right.",
+    "Pick a spot two inches in front of your ball.",
+    "Roll it over that spot, keep your head dead still.",
+    "Now the face stays square and the ball starts on line."
+  ],
+  "brollSrc": "broll/you-putt-with-your-eyes-open-too-long.png",
+  "audioSrc": null
+}

@@ -14,8 +14,8 @@ Parameters:
     Description: Secrets Manager ARN holding the IG access token (raw string or {"IG_ACCESS_TOKEN":"..."})
   ScheduleExpression:
     Type: String
-    Default: cron(0 14 * * ? *)
-    Description: When to post (UTC). Default 14:00 UTC (~9am US Eastern).
+    Default: cron(0 13,21 * * ? *)
+    Description: When to post (UTC). Default 13:00 and 21:00 UTC (~9am and ~5pm US Eastern).
 
 Resources:
   PosterFunction:
@@ -46,7 +46,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: !Ref ScheduleExpression
-            Description: insta-golf daily post
+            Description: insta-golf scheduled post (twice daily)
 
 Outputs:
   PosterFunction:

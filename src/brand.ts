@@ -19,12 +19,21 @@ export const BRAND = {
   signoff: "Keep it in the short grass. — Bogey",
 } as const;
 
-// Reel canvas + default pacing.
+// Reel canvas + default pacing. Text-on-screen only, so every card has to be
+// readable at a glance — pacing is deliberately unhurried.
 export const VIDEO = {
   width: 1080,
   height: 1920,
   fps: 30,
-  hookSeconds: 2.5,
-  secondsPerBeat: 2.2,
-  signoffSeconds: 2,
+  hookSeconds: 3,
+  secondsPerBeat: 3,
+  signoffSeconds: 2.5,
+  // A joke's punchline card holds longer than a beat — the laugh needs a moment.
+  punchSeconds: 4,
+} as const;
+
+// Square-ish canvas shared by the swipeable carousel and single-image memes.
+export const POST = {
+  width: 1080,
+  height: 1350,
 } as const;

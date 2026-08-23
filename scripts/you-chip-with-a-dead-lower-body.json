@@ -1,0 +1,23 @@
+{
+  "slug": "you-chip-with-a-dead-lower-body",
+  "kind": "tip",
+  "hook": "You chip with your feet cemented to the ground.",
+  "beats": [
+    "All arms, no rotation, and you flip at it.",
+    "Narrow your stance and lean into your lead side.",
+    "Let your chest turn through, hands lead the club.",
+    "Ball comes off crisp and rolls out like a putt."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 65
+    },
+    null,
+    null
+  ],
+  "brollSrc": "broll/you-chip-with-a-dead-lower-body.png",
+  "audioSrc": null
+}

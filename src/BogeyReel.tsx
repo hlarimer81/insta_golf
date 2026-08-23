@@ -44,7 +44,7 @@ const KenBurnsImage: React.FC<{ src: string }> = ({ src }) => {
 };
 
 /** Fairway-green background with an optional b-roll layer + legibility scrim. */
-const Background: React.FC<{ brollSrc: string | null }> = ({ brollSrc }) => (
+export const Background: React.FC<{ brollSrc: string | null }> = ({ brollSrc }) => (
   <AbsoluteFill style={{ backgroundColor: BRAND.colors.green }}>
     {brollSrc &&
       (isImageSrc(brollSrc) ? (
@@ -67,7 +67,7 @@ const Background: React.FC<{ brollSrc: string | null }> = ({ brollSrc }) => (
 );
 
 /** Persistent "🧢 BOGEY" wordmark, top-left. */
-const Wordmark: React.FC = () => (
+export const Wordmark: React.FC = () => (
   <div
     style={{
       position: "absolute",
@@ -204,6 +204,47 @@ const WeightBar: React.FC<{ lead: number }> = ({ lead }) => {
   );
 };
 
+/** The punchline of a joke: pops in with a little overshoot, then holds. */
+const PunchCard: React.FC<{ text: string }> = ({ text }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  // Low damping = a bounce on arrival, which sells the beat as a punchline.
+  const pop = spring({ frame, fps, config: { damping: 11, mass: 0.6 }, durationInFrames: 26 });
+  const scale = interpolate(pop, [0, 1], [0.72, 1]);
+  const rotate = interpolate(pop, [0, 1], [-4, 0]);
+
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 80px" }}>
+      <div style={{ transform: `scale(${scale}) rotate(${rotate}deg)` }}>
+        {/* Dark plate: the accent yellow has to stay readable even when the
+            background image is a bright, sunlit fairway. */}
+        <div
+          style={{
+            padding: "48px 54px",
+            borderRadius: 36,
+            backgroundColor: "rgba(8,38,29,0.78)",
+            boxShadow: "0 18px 60px rgba(0,0,0,0.45)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: BRAND.fonts.display,
+              fontWeight: 900,
+              fontSize: 92,
+              lineHeight: 1.06,
+              color: BRAND.colors.accent,
+              textAlign: "center",
+              textShadow: "0 6px 28px rgba(0,0,0,0.65)",
+            }}
+          >
+            {text}
+          </div>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 /** A beat that may carry an animated diagram beneath its text. */
 const BeatCard: React.FC<{
   text: string;
@@ -251,17 +292,21 @@ export const BogeyReel: React.FC<ReelProps> = (props) => {
     hook,
     beats,
     visuals,
+    punchline,
     signoff,
     brollSrc,
     audioSrc,
     hookSeconds,
     secondsPerBeat,
+    punchSeconds,
     signoffSeconds,
   } = props;
 
   const hookFrames = Math.round(hookSeconds * fps);
   const beatFrames = Math.round(secondsPerBeat * fps);
+  const punchFrames = punchline ? Math.round(punchSeconds * fps) : 0;
   const signoffFrames = Math.round(signoffSeconds * fps);
+  const afterBeats = hookFrames + beats.length * beatFrames;
 
   const frame = useCurrentFrame();
   const activeBeat = Math.floor((frame - hookFrames) / beatFrames);
@@ -294,11 +339,15 @@ export const BogeyReel: React.FC<ReelProps> = (props) => {
         <Dots count={beats.length} active={activeBeat} />
       )}
 
+      {/* Punchline (jokes only) */}
+      {punchline && (
+        <Sequence from={afterBeats} durationInFrames={punchFrames}>
+          <PunchCard text={punchline} />
+        </Sequence>
+      )}
+
       {/* Sign-off */}
-      <Sequence
-        from={hookFrames + beats.length * beatFrames}
-        durationInFrames={signoffFrames}
-      >
+      <Sequence from={afterBeats + punchFrames} durationInFrames={signoffFrames}>
         <TextCard text={signoff} fontSize={64} />
       </Sequence>
     </AbsoluteFill>

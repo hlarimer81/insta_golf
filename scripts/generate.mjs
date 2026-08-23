@@ -5,6 +5,7 @@
  *   npm run generate                          # 5 scripts, general golf tips
  *   npm run generate -- "fixing a slice"      # 5 scripts on a topic
  *   npm run generate -- --count 8 "putting"   # 8 scripts on a topic
+ *   npm run generate -- --kind joke "bunkers" # 5 golf jokes (Reel or meme)
  *
  * Each generated script is written to scripts/<slug>.json in the same shape
  * the renderer consumes (see src/schema.ts). Feed them straight to:
@@ -44,13 +45,16 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1);
 }
 
-// ---- Args: [--count N] [topic words...] ----------------------------------
+// ---- Args: [--count N] [--kind tip|joke] [topic words...] -----------------
 const args = process.argv.slice(2);
 let count = 5;
+let kind = "tip";
 const topicWords = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--count" || args[i] === "-n") {
     count = parseInt(args[++i], 10);
+  } else if (args[i] === "--kind") {
+    kind = args[++i];
   } else {
     topicWords.push(args[i]);
   }
@@ -59,7 +63,16 @@ if (!Number.isFinite(count) || count < 1) {
   console.error("--count must be a positive integer.");
   process.exit(1);
 }
-const topic = topicWords.join(" ").trim() || "everyday golf tips for weekend players";
+if (kind !== "tip" && kind !== "joke") {
+  console.error(`--kind must be "tip" or "joke" (got "${kind}").`);
+  process.exit(1);
+}
+const isJoke = kind === "joke";
+const topic =
+  topicWords.join(" ").trim() ||
+  (isJoke
+    ? "the everyday indignities of weekend golf"
+    : "everyday golf tips for weekend players");
 
 // ---- What's already been written (so Bogey doesn't repeat himself) --------
 // Scan approved, drafted, and rejected scripts alike.
@@ -103,6 +116,30 @@ Voice rules:
 - No emoji, no hashtags, no "hey golfers", no calls to follow/like.
 - Every tip must be actually correct and genuinely useful.
 - No two scripts should share a hook angle or a fix.`;
+
+// Same Bogey, off the clock. One joke script feeds two formats: a text Reel
+// (setup → beats → punchline) and a single-image meme (setup → punchline), so
+// the setup and punchline have to land on their own without the middle beats.
+const JOKE_SYSTEM = `You are Bogey — the everyman caddie behind a faceless golf Instagram page.
+Dry, deadpan, observational. You love this stupid game and you've suffered every part of it.
+
+You write short golf JOKES as text on screen — no face, no voiceover, so the words do everything.
+A joke is:
+- hook: the SETUP. One line that any weekend golfer recognizes instantly. It should be funny-adjacent
+  on its own, because it's also the top line of a meme image.
+- beats: 2-3 short lines that escalate the setup. Each is ONE short line. They build the situation —
+  they do NOT explain the joke and they do NOT give the punchline away.
+- punchline: the payoff. One line, as short as you can make it. It must land on its own directly
+  after the setup, because the meme format shows ONLY setup + punchline. Put the funniest word last.
+
+Comedy rules:
+- Observational and self-deprecating: the shanks, the provisional, the 4-hour round, the guy who
+  gives unsolicited lessons, the $600 driver that goes the same distance, "I'm due", range confidence.
+- Punch at ourselves and at golf, never at a person, a group, or anyone's ability to afford the game.
+- Deadpan and specific. Real clubs, real numbers, real situations. Specific is funnier than clever.
+- No emoji, no hashtags, no "golfers be like", no puns on famous names, no dad-joke wordplay.
+- Nothing mean, nothing crude, nothing about gambling or drinking to excess.
+- No two jokes should share a premise.`;
 
 const schema = {
   type: "object",
@@ -154,8 +191,42 @@ const schema = {
   required: ["scripts"],
 };
 
+const jokeSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    scripts: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          slug: {
+            type: "string",
+            description: "kebab-case filename, derived from the setup, e.g. nobody-hits-a-good-provisional",
+          },
+          hook: { type: "string", description: "the setup line (also the meme's top line)" },
+          beats: {
+            type: "array",
+            description: "2-3 short lines that escalate the setup without spoiling the punchline",
+            items: { type: "string" },
+          },
+          punchline: {
+            type: "string",
+            description: "the payoff line — must land directly after the setup on its own",
+          },
+        },
+        required: ["slug", "hook", "beats", "punchline"],
+      },
+    },
+  },
+  required: ["scripts"],
+};
+
 const userPrompt =
-  `Write ${count} distinct Bogey Reel scripts about: ${topic}.` +
+  (isJoke
+    ? `Write ${count} distinct Bogey golf jokes about: ${topic}.`
+    : `Write ${count} distinct Bogey Reel scripts about: ${topic}.`) +
   (existingHooks.length
     ? `\n\nDo NOT reuse or lightly reword any of these hooks that already exist:\n` +
       existingHooks.map((h) => `- ${h}`).join("\n")
@@ -164,16 +235,18 @@ const userPrompt =
 // ---- Generate -------------------------------------------------------------
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY
 
-console.log(`✍️  Asking Bogey for ${count} script(s) on "${topic}"...\n`);
+console.log(
+  `✍️  Asking Bogey for ${count} ${isJoke ? "joke" : "script"}(s) on "${topic}"...\n`,
+);
 
 const response = await client.messages.create({
   model: "claude-opus-4-8",
   max_tokens: 8000,
   thinking: { type: "adaptive" },
-  system: SYSTEM,
+  system: isJoke ? JOKE_SYSTEM : SYSTEM,
   output_config: {
     effort: "medium",
-    format: { type: "json_schema", schema },
+    format: { type: "json_schema", schema: isJoke ? jokeSchema : schema },
   },
   messages: [{ role: "user", content: userPrompt }],
 });
@@ -215,18 +288,28 @@ for (const s of scripts) {
   }
   const slug = slugify(s.slug || s.hook);
   const outPath = uniqueDraftPath(slug);
+  if (isJoke && !s.punchline) {
+    console.warn("Skipping joke with no punchline:", JSON.stringify(s));
+    continue;
+  }
   const visuals = Array.isArray(s.visuals) ? s.visuals : [];
   const reel = {
     slug: slug,
+    kind,
     hook: s.hook,
     beats: s.beats,
     // Only carry visuals when at least one beat has a diagram.
     ...(visuals.some((v) => v) ? { visuals } : {}),
+    ...(isJoke ? { punchline: s.punchline } : {}),
     brollSrc: null,
     audioSrc: null,
   };
   writeFileSync(outPath, JSON.stringify(reel, null, 2) + "\n");
-  console.log(`📝  ${s.hook}\n    → scripts/drafts/${outPath.split("/").pop()}`);
+  console.log(
+    `${isJoke ? "😄" : "📝"}  ${s.hook}` +
+      (isJoke ? `\n    ${s.punchline}` : "") +
+      `\n    → scripts/drafts/${outPath.split("/").pop()}`,
+  );
   written++;
 }
 

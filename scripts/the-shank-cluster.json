@@ -1,0 +1,13 @@
+{
+  "slug": "the-shank-cluster",
+  "kind": "joke",
+  "hook": "You never shank just one.",
+  "beats": [
+    "First one rockets dead right into the trees.",
+    "You slow down, breathe, reset.",
+    "Tell yourself that was a fluke."
+  ],
+  "punchline": "The next four go to the same tree.",
+  "brollSrc": "broll/the-shank-cluster.png",
+  "audioSrc": null
+}

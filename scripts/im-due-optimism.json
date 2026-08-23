@@ -1,0 +1,13 @@
+{
+  "slug": "im-due-optimism",
+  "kind": "joke",
+  "hook": "You've said 'I'm due' on the tee eleven times today.",
+  "beats": [
+    "Due after the shank on one.",
+    "Due after three-putting the fourth.",
+    "Due after the provisional on nine."
+  ],
+  "punchline": "Turns out you were due for a 94.",
+  "brollSrc": "broll/im-due-optimism.png",
+  "audioSrc": null
+}

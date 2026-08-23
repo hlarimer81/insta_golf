@@ -1,0 +1,13 @@
+{
+  "slug": "waiting-on-every-shot",
+  "kind": "joke",
+  "hook": "Five and a half hours for eighteen holes.",
+  "beats": [
+    "Group ahead lost four balls on hole two.",
+    "You've eaten your whole lunch by the seventh.",
+    "The starter said you'd 'fly around out there.'"
+  ],
+  "punchline": "You've had time to regret buying the season pass.",
+  "brollSrc": "broll/waiting-on-every-shot.png",
+  "audioSrc": null
+}

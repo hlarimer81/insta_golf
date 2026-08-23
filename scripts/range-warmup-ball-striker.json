@@ -1,0 +1,13 @@
+{
+  "slug": "range-warmup-ball-striker",
+  "kind": "joke",
+  "hook": "On the range you're a scratch golfer.",
+  "beats": [
+    "Pured every 7-iron.",
+    "Flushed the driver ten in a row.",
+    "Told your buddy this is the day."
+  ],
+  "punchline": "First tee, brand new swing you've never seen before.",
+  "brollSrc": "broll/range-warmup-ball-striker.png",
+  "audioSrc": null
+}

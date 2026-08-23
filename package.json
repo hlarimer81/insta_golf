@@ -11,6 +11,7 @@
     "render": "node scripts/render.mjs",
     "profile": "remotion still ProfilePic out/bogey-profile.png",
     "render:carousel": "node scripts/render-carousel.mjs",
+    "render:meme": "node scripts/render-meme.mjs",
     "bg": "node scripts/bg.mjs",
     "refresh:bg": "node scripts/refresh-backgrounds.mjs",
     "schedule": "node scripts/schedule.mjs",
