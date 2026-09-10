@@ -1,7 +1,7 @@
 {
   "name": "insta-golf",
   "version": "0.1.0",
-  "description": "Faceless golf Instagram automation — Bogey text-on-screen Reel renderer",
+  "description": "Faceless golf Instagram automation \u2014 Bogey text-on-screen Reel renderer",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
@@ -20,19 +20,22 @@
     "stats": "node scripts/stats.mjs",
     "build:lambda": "esbuild lambda/poster.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/poster.js",
     "render:raw": "remotion render",
-    "upgrade": "remotion upgrade"
+    "upgrade": "remotion upgrade",
+    "ensure:queue": "node scripts/ensure-queue.mjs",
+    "report": "node scripts/stats-report.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
     "@aws-sdk/client-s3": "^3.1105.0",
     "@aws-sdk/client-secrets-manager": "^3.1106.0",
+    "@aws-sdk/client-sesv2": "^3.1129.0",
     "@aws-sdk/client-sts": "^3.1105.0",
     "@aws-sdk/s3-request-presigner": "^3.1105.0",
     "@remotion/cli": "4.0.507",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "remotion": "4.0.507",
-    "zod": "3.23.8"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/react": "19.2.0",

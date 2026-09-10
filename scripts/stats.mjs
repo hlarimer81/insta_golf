@@ -3,6 +3,7 @@
  * Pull performance stats for posted Reels from the Instagram Graph API.
  *
  *   npm run stats
+ *   npm run stats -- --days 30      # only posts from the last 30 days
  *
  * Reads the published entries (those with a media id) from the cloud queue in
  * S3, then fetches each Reel's numbers: likes/comments from the media object,
@@ -16,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { makeS3, getJson } from "./lib/s3.mjs";
+import { fetchStats, tokenHealth, sum } from "./lib/ig-stats.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(join(root, ".env"))) {
@@ -32,71 +34,39 @@ for (const k of ["AWS_REGION", "S3_BUCKET", "IG_ACCESS_TOKEN"]) {
   }
 }
 
+const argv = process.argv.slice(2);
+const daysArg = argv.indexOf("--days");
+const days = daysArg >= 0 && argv[daysArg + 1] ? parseInt(argv[daysArg + 1], 10) : null;
+
 const region = process.env.AWS_REGION;
 const bucket = process.env.S3_BUCKET;
 const queueKey = process.env.CLOUD_QUEUE_KEY ?? "queue.json";
 const token = process.env.IG_ACCESS_TOKEN;
 const version = process.env.GRAPH_API_VERSION ?? "v21.0";
-const insightMetrics = (process.env.IG_INSIGHT_METRICS ?? "views,reach,saved,shares")
+const metrics = (process.env.IG_INSIGHT_METRICS ?? "views,reach,saved,shares")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-
-// Graph GET that returns errors instead of throwing, so one bad call doesn't
-// sink the whole report.
-async function gget(path, params) {
-  const qs = new URLSearchParams({ ...params, access_token: token });
-  const res = await fetch(`https://graph.facebook.com/${version}/${path}?${qs}`);
-  const json = await res.json();
-  return { ok: res.ok && !json.error, json, error: json.error };
-}
 
 const num = (v) => (v == null ? "—" : Number(v).toLocaleString());
 
 const s3 = makeS3(region);
 const queue = await getJson(s3, { bucket, key: queueKey });
-const published = (queue?.entries ?? [])
-  .filter((e) => e.status === "published" && e.mediaId)
-  .sort((a, b) => (a.postedAt ?? a.publishAt).localeCompare(b.postedAt ?? b.publishAt));
+let { rows, scopeHint } = await fetchStats({
+  token,
+  version,
+  metrics,
+  entries: queue?.entries ?? [],
+});
 
-if (published.length === 0) {
-  console.log("No published Reels yet. Stats appear here once the poster has run.");
-  process.exit(0);
+if (days) {
+  const cutoff = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  rows = rows.filter((r) => r.date >= cutoff);
 }
 
-let scopeHint = false;
-const totals = { views: 0, reach: 0, likes: 0, comments: 0, saved: 0, shares: 0 };
-const rows = [];
-
-for (const e of published) {
-  const media = await gget(e.mediaId, {
-    fields: "permalink,timestamp,like_count,comments_count",
-  });
-
-  // Insights: try the configured metrics, fall back to reach-only if the set
-  // is rejected (Instagram occasionally renames metrics).
-  let insights = {};
-  let r = await gget(`${e.mediaId}/insights`, { metric: insightMetrics.join(",") });
-  if (!r.ok) {
-    const r2 = await gget(`${e.mediaId}/insights`, { metric: "reach" });
-    if (r2.ok) r = r2;
-    else if (/permission|insights/i.test(r.error?.message ?? "")) scopeHint = true;
-  }
-  if (r.ok) for (const m of r.json.data ?? []) insights[m.name] = m.values?.[0]?.value;
-
-  const row = {
-    date: (e.postedAt ?? media.json.timestamp ?? e.publishAt).slice(0, 10),
-    slug: e.slug,
-    permalink: media.json.permalink,
-    views: insights.views,
-    reach: insights.reach,
-    likes: media.json.like_count,
-    comments: media.json.comments_count,
-    saved: insights.saved,
-    shares: insights.shares,
-  };
-  rows.push(row);
-  for (const k of Object.keys(totals)) if (typeof row[k] === "number") totals[k] += row[k];
+if (rows.length === 0) {
+  console.log("No published Reels yet. Stats appear here once the poster has run.");
+  process.exit(0);
 }
 
 console.log("");
@@ -112,8 +82,28 @@ for (const r of rows) {
 // Summary + best performer (by views, else reach, else likes).
 const rank = (r) => r.views ?? r.reach ?? r.likes ?? 0;
 const best = rows.reduce((a, b) => (rank(b) > rank(a) ? b : a));
-console.log(`\n${rows.length} posted — totals: views ${num(totals.views)}, likes ${num(totals.likes)}, comments ${num(totals.comments)}`);
+console.log(
+  `\n${rows.length} posted — totals: views ${num(sum(rows, "views"))}, ` +
+    `likes ${num(sum(rows, "likes"))}, comments ${num(sum(rows, "comments"))}`,
+);
 console.log(`Top performer: ${best.slug} (${num(rank(best))})`);
+
+// Reels vs static, the split that drives every format decision on this account.
+const reels = rows.filter((r) => r.isReel);
+const statics = rows.filter((r) => !r.isReel);
+if (reels.length && statics.length) {
+  const per = (a) => (sum(a, "views") / a.length).toFixed(1);
+  console.log(`Reels ${reels.length} avg ${per(reels)} — static ${statics.length} avg ${per(statics)}`);
+}
+
+// Data access lapses 60 days after authorization and takes insights with it.
+const health = await tokenHealth({ token, version });
+if (health.ok && health.dataAccessExpiresInDays != null && health.dataAccessExpiresInDays < 21) {
+  console.log(
+    `\n⚠️  Token data access expires in ${health.dataAccessExpiresInDays} days ` +
+      `(${health.dataAccessExpiresOn}). Re-authorize before then or stats and posting stop.`,
+  );
+}
 
 if (scopeHint) {
   console.log(

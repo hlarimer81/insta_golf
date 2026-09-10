@@ -231,6 +231,53 @@ and no local files are involved — just S3 + the Graph API.
 > ⚠️ This posts with **no human review** — whatever you enqueue goes live on the
 > schedule. Eyeball Reels before enqueuing, or add a review step back in.
 
+## Hands-off operation (GitHub Actions)
+
+`.github/workflows/keep-queue-full.yml` runs the account without you touching it.
+
+| Job | When | What it does |
+|---|---|---|
+| `topup` | daily, 06:00 UTC | If fewer than 7 posts remain queued, stages enough to reach 14 and commits the new scripts back |
+| `report` | Mondays, 14:00 UTC | Emails a week-over-week read of performance, written by Claude |
+
+Both are also runnable by hand from the Actions tab (**Run workflow**).
+
+The top-up is deliberately **daily and idempotent** — it's a no-op six days out
+of seven. The queue drained on 2026-08-31 and the account sat dark for nine days;
+a weekly refill would still have left a gap that big possible.
+
+You can check the same thing locally at any time:
+
+```bash
+npm run ensure:queue -- --dry-run   # how much runway is left?
+npm run report -- --dry-run         # what would this week's email say?
+```
+
+### One-time setup
+
+AWS access uses **OIDC role assumption** — no AWS keys are stored in GitHub. The
+role `insta-golf-github-actions` is scoped to this one bucket plus SES; it can't
+touch anything else in the account.
+
+Set these in the repo (Settings → Secrets and variables → Actions):
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret | `ANTHROPIC_API_KEY` | script generation + the weekly read |
+| Secret | `FAL_KEY` | AI backgrounds |
+| Secret | `IG_ACCESS_TOKEN` | reading insights |
+| Variable | `REPORT_FROM` | a **verified** SES identity |
+| Variable | `REPORT_TO` | where the report goes |
+
+SES is in sandbox mode, so both addresses must be verified identities. Add one
+with `aws ses verify-email-identity --email-address you@example.com`, then click
+the link that arrives.
+
+> ⚠️ **The access token's data access expires 60 days after authorization** —
+> currently 2026-11-17. When it lapses, insights reads and posting both stop, and
+> nothing will tell you except the account going quiet. The weekly report carries
+> a countdown and starts warning at 21 days out; re-authorize before then.
+
 ## Generating scripts
 
 Let Bogey write the scripts for you. This calls Claude and drops finished

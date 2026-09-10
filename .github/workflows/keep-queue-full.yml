@@ -1,0 +1,103 @@
+# Keeps the Instagram queue stocked and mails a weekly read of how it's going.
+#
+# The queue drained on 2026-08-31 and the account sat dark for nine days before
+# anyone noticed. The top-up job runs every morning and is a no-op on most days;
+# that's what makes it self-healing rather than a weekly gamble.
+#
+# AWS access is via OIDC role assumption — no long-lived keys in this repo.
+name: Keep queue full
+
+on:
+  schedule:
+    - cron: "0 6 * * *"    # daily, well before the 13:00 UTC poster firing
+    - cron: "0 14 * * 1"   # Mondays, after that day's post has gone out
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Which job to run
+        type: choice
+        options: [topup, report, both]
+        default: both
+
+permissions:
+  id-token: write    # required to assume the AWS role via OIDC
+  contents: write    # the top-up commits newly generated scripts back
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE: arn:aws:iam::103690404054:role/insta-golf-github-actions
+  S3_BUCKET: insta-golf-103690404054-us-east-1-an
+
+jobs:
+  topup:
+    name: Top up the queue
+    if: github.event.schedule == '0 6 * * *' || inputs.job == 'topup' || inputs.job == 'both'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      # Remotion renders in a headless Chrome it manages itself; this pulls it
+      # once so the first render doesn't pay for the download.
+      - name: Ensure Remotion's browser
+        run: npx remotion browser ensure
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Top up if the queue is below a week
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+        run: npm run ensure:queue -- --min 7 --target 14
+
+      # Generated scripts must land back in the repo: the generator dedupes
+      # against scripts/, so losing them means it starts repeating itself.
+      - name: Commit any new scripts
+        run: |
+          if [ -z "$(git status --porcelain scripts/)" ]; then
+            echo "No new scripts — queue was already stocked."
+            exit 0
+          fi
+          git config user.name "insta-golf bot"
+          git config user.email "actions@github.com"
+          git add scripts/
+          git commit -m "Top up the queue
+
+          Staged automatically because the queue fell below 7 posts.
+
+          Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
+          git push
+
+  report:
+    name: Weekly report
+    if: github.event.schedule == '0 14 * * 1' || inputs.job == 'report' || inputs.job == 'both'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build and send the report
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          REPORT_FROM: ${{ vars.REPORT_FROM }}
+          REPORT_TO: ${{ vars.REPORT_TO }}
+        run: npm run report
