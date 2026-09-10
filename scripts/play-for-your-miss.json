@@ -1,0 +1,13 @@
+{
+  "slug": "play-for-your-miss",
+  "kind": "tip",
+  "hook": "You know your slice is coming. Aim for it.",
+  "beats": [
+    "You fight the miss all day and it shows up anyway.",
+    "Trouble's right? Aim down the left edge and let it drift back.",
+    "Now your worst shot ends up in the fairway.",
+    "Play the ball you actually have, not the one you wish you had."
+  ],
+  "brollSrc": "broll/play-for-your-miss.png",
+  "audioSrc": null
+}

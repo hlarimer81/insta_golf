@@ -1,0 +1,14 @@
+{
+  "slug": "you-chip-straight-at-the-flag",
+  "kind": "tip",
+  "hook": "You chip straight at the flag. Wrong target.",
+  "beats": [
+    "A chip flies a third of the way and rolls the rest.",
+    "So stop aiming the ball at the hole.",
+    "Pick a landing spot a few feet onto the green.",
+    "Land it there, let it release like a putt.",
+    "Now you're leaving tap-ins instead of guessing."
+  ],
+  "brollSrc": "broll/you-chip-straight-at-the-flag.png",
+  "audioSrc": null
+}

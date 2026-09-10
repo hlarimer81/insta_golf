@@ -1,0 +1,24 @@
+{
+  "slug": "you-set-up-to-driver-like-an-iron",
+  "kind": "tip",
+  "hook": "You set up to your driver like it's a 7-iron.",
+  "beats": [
+    "Ball's in the middle, weight even, and you hit down on it.",
+    "Driver wants the ball off your lead heel.",
+    "Tilt your spine back so your head's behind the ball.",
+    "Lean a touch onto your trail side at address.",
+    "Now you catch it going up and it actually flies."
+  ],
+  "visuals": [
+    null,
+    null,
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 40
+    }
+  ],
+  "brollSrc": "broll/you-set-up-to-driver-like-an-iron.png",
+  "audioSrc": null
+}

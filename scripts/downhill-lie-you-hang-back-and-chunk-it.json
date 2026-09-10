@@ -1,0 +1,24 @@
+{
+  "slug": "downhill-lie-you-hang-back-and-chunk-it",
+  "kind": "tip",
+  "hook": "Downhill lie: you hang back trying to lift it and chunk the ground.",
+  "beats": [
+    "The slope already launches the ball low. Fighting it is the mistake.",
+    "Set your shoulders to match the slope, tilted downhill.",
+    "Put a little more weight on your lower foot at setup.",
+    "Play the ball back a hair and chase the club down the hill.",
+    "Take one less loft. The ball flies lower than you think."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null,
+    null
+  ],
+  "brollSrc": "broll/downhill-lie-you-hang-back-and-chunk-it.png",
+  "audioSrc": null
+}

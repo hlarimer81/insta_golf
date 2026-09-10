@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Stage a full week (or two) of content in one command: generate scripts,
- * render them (Reels, carousels, memes — interleaved), and enqueue them to the
- * cloud queue.
+ * render them, and enqueue them to the cloud queue. Everything ships as a Reel
+ * unless --allow-static is passed.
  *
  *   npm run stage:week
  *   npm run stage:week -- --count 14 --backgrounds
@@ -12,16 +12,19 @@
  * Options:
  *   --count N         posts to stage (default 7)
  *   --humor N         how many of those are jokes (default: half). Jokes are
- *                     spread evenly through the run and alternate between a
- *                     joke Reel and a single-image meme. --humor 0 = tips only.
+ *                     spread evenly through the run. --humor 0 = tips only.
  *   --topic "..."     tip generation topic (default: broad weekend-golfer tips)
  *   --humor-topic "..."  joke generation topic (default: weekend-golf misery)
  *   --start YYYY-MM-DD first post date (default: the day after the last
  *                     already-queued post, so weeks append cleanly)
  *   --utc-hour H      hour (UTC) to post each day (default 12; the daily
  *                     Lambda cron fires at 13:00 UTC)
+ *   --allow-static    stage some posts as static feed content (tips alternate
+ *                     reel/carousel, jokes alternate Reel/image meme). OFF by
+ *                     default: static posts average 5 views on this account
+ *                     against 74 for Reels, so everything ships as a Reel.
  *   --start-format reel|carousel   which format the first TIP is (default
- *                     reel); tips alternate from there
+ *                     reel); only meaningful with --allow-static
  *   --backgrounds     also generate an AI background per post (needs FAL_KEY;
  *                     costs ~1–4¢/image). Diagrams are automatic either way.
  *
@@ -58,6 +61,7 @@ const humorTopic = opt("humor-topic", "the everyday indignities of weekend golf:
 const startArg = opt("start", null);
 const utcHour = parseInt(opt("utc-hour", "12"), 10);
 const startFormat = opt("start-format", "reel") === "carousel" ? "carousel" : "reel";
+const allowStatic = argv.includes("--allow-static");
 const backgrounds = argv.includes("--backgrounds");
 const humorCount = Math.max(
   0,
@@ -122,12 +126,17 @@ if (startArg) {
   const maxIso = queue.entries.reduce((m, e) => (e.publishAt > m ? e.publishAt : m), "");
   const base = maxIso ? new Date(maxIso) : new Date();
   start = new Date(base.getTime() + 86400000); // day after the last post
+  // If the queue has been drained for a while, that day is in the past and
+  // every post would be due on the next firing. Start tomorrow instead.
+  const tomorrow = new Date(Date.now() + 86400000);
+  if (start < tomorrow) start = tomorrow;
 }
 start.setUTCHours(utcHour, 0, 0, 0);
 
-// Roles alternate within each lane: tips flip reel ↔ carousel, jokes flip
-// Reel ↔ meme. Humor is spread evenly across the run rather than clumped, and
-// day 1 is a tip whenever there are any.
+// Everything is a Reel by default. Under --allow-static the old alternation
+// comes back: tips flip reel ↔ carousel, jokes flip Reel ↔ meme. Humor is
+// spread evenly across the run rather than clumped, and day 1 is a tip
+// whenever there are any.
 const plan = [];
 let placedHumor = 0;
 let tipIdx = 0;
@@ -140,12 +149,18 @@ for (let i = 0; i < count; i++) {
     placedHumor++;
     plan.push({
       slug: jokeSlugs[jokeIdx],
-      role: jokeIdx % 2 === 0 ? "joke" : "meme",
+      role: allowStatic && jokeIdx % 2 === 1 ? "meme" : "joke",
       iso: when.toISOString(),
     });
     jokeIdx++;
   } else {
-    const flip = tipIdx % 2 === 0 ? startFormat : startFormat === "reel" ? "carousel" : "reel";
+    const flip = allowStatic
+      ? tipIdx % 2 === 0
+        ? startFormat
+        : startFormat === "reel"
+          ? "carousel"
+          : "reel"
+      : "reel";
     plan.push({ slug: tipSlugs[tipIdx], role: flip, iso: when.toISOString() });
     tipIdx++;
   }

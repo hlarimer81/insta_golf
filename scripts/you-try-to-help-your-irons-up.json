@@ -1,0 +1,24 @@
+{
+  "slug": "you-try-to-help-your-irons-up",
+  "kind": "tip",
+  "hook": "You try to help your irons into the air.",
+  "beats": [
+    "That scoop is why you thin and chunk it.",
+    "The loft does the lifting, not your hands.",
+    "Set 55% on your lead foot and keep it there.",
+    "Swing down and take a divot after the ball.",
+    "Ball first, turf second, and it climbs on its own."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 55
+    },
+    null,
+    null
+  ],
+  "brollSrc": "broll/you-try-to-help-your-irons-up.png",
+  "audioSrc": null
+}

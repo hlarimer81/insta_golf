@@ -1,0 +1,22 @@
+{
+  "slug": "club-behind-the-ball-chip",
+  "kind": "tip",
+  "hook": "Your chips are fat because you set up level.",
+  "beats": [
+    "Weight sits 50/50 and you flip at it.",
+    "Lean the shaft toward the target at address.",
+    "Set 60% on your lead foot and keep it there.",
+    "Ball-first contact, every time."
+  ],
+  "visuals": [
+    null,
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    }
+  ],
+  "brollSrc": "broll/club-behind-the-ball-chip.png",
+  "audioSrc": null
+}

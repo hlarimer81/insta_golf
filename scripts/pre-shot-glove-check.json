@@ -1,0 +1,13 @@
+{
+  "slug": "pre-shot-glove-check",
+  "kind": "tip",
+  "hook": "Your grip pressure is strangling your irons.",
+  "beats": [
+    "White knuckles kill your wrist hinge.",
+    "On a scale of ten, you're squeezing a nine.",
+    "Drop it to a four and let the club swing.",
+    "Softer hands, better contact, more distance."
+  ],
+  "brollSrc": "broll/pre-shot-glove-check.png",
+  "audioSrc": null
+}

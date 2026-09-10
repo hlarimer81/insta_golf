@@ -1,0 +1,13 @@
+{
+  "slug": "driver-is-not-your-scorecard",
+  "kind": "tip",
+  "hook": "Your driver isn't the club wrecking your score.",
+  "beats": [
+    "It's the second shot after a bad drive.",
+    "You try a hero recovery through a two-foot gap.",
+    "Just punch it back to the fairway.",
+    "Bogey beats double every single time."
+  ],
+  "brollSrc": "broll/driver-is-not-your-scorecard.png",
+  "audioSrc": null
+}

@@ -1,0 +1,24 @@
+{
+  "slug": "buried-in-thick-rough-you-swing-like-fairway",
+  "kind": "tip",
+  "hook": "Ball sitting down in thick rough? Stop swinging like it's the fairway.",
+  "beats": [
+    "The grass grabs the hosel and shuts the face fast.",
+    "Open the face at address so the rough can't slam it closed.",
+    "Set 60% on your lead foot and hit steeply down on it.",
+    "Grip tighter and pick a club with loft to escape clean.",
+    "Take your medicine, get it out, live to swing again."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null,
+    null
+  ],
+  "brollSrc": "broll/buried-in-thick-rough-you-swing-like-fairway.png",
+  "audioSrc": null
+}

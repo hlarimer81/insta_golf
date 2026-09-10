@@ -1,0 +1,22 @@
+{
+  "slug": "your-low-point-is-behind-the-ball",
+  "kind": "tip",
+  "hook": "You hit the ground before the ball.",
+  "beats": [
+    "That's a fat shot, and it's a low-point problem.",
+    "Play the ball an inch back and lean the shaft forward.",
+    "Set 55% of your weight on the lead foot and keep it there.",
+    "Ball first, turf second. That's a crisp iron."
+  ],
+  "visuals": [
+    null,
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 55
+    }
+  ],
+  "brollSrc": "broll/your-low-point-is-behind-the-ball.png",
+  "audioSrc": null
+}
