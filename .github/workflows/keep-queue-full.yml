@@ -74,6 +74,8 @@ jobs:
           Staged automatically because the queue fell below 7 posts.
 
           Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
+          # Nobody is watching this run, so don't fail on a repo that moved.
+          git pull --rebase origin main
           git push
 
   report:

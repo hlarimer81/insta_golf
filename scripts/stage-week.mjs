@@ -7,7 +7,7 @@
  *   npm run stage:week
  *   npm run stage:week -- --count 14 --backgrounds
  *   npm run stage:week -- --count 7 --humor 0 --topic "putting and short game"
- *   npm run stage:week -- --start 2026-09-01 --start-format carousel
+ *   npm run stage:week -- --start 2026-09-01 --allow-static
  *
  * Options:
  *   --count N         posts to stage (default 7)
