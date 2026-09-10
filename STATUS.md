@@ -2,97 +2,120 @@
 
 _Last updated: 2026-09-09_
 
+## ⚠️ Action required: roll the Instagram credential
+
+**The token's data access expires 2026-11-17 — 68 days out.**
+
+The token itself is a PAGE token and never expires, so nothing looks wrong until
+the day it stops. When data access lapses, insights reads and publishing both
+fail and **nothing announces it** — the account simply goes quiet, which is the
+exact failure this project was automated to prevent.
+
+This is the one thing here that cannot be automated away: re-authorization needs
+a human at the Graph API Explorer.
+
+To roll it:
+
+1. Graph API Explorer → your app (**Bogey Golf**) → **Generate Access Token**.
+2. Keep every scope currently on it, or insights will silently degrade:
+   `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights`,
+   `pages_show_list`, `pages_read_engagement`, `business_management`.
+3. Exchange for a long-lived token, then a page token.
+4. Update it in **both** places — they are separate copies:
+   - `.env` → `IG_ACCESS_TOKEN` (local CLI use)
+   - GitHub → repo secret `IG_ACCESS_TOKEN` (the weekly report)
+   - Secrets Manager `insta-golf/ig-token` (the poster Lambda — this is the one
+     that actually publishes; miss it and posting stops even if stats work)
+5. Confirm with `npm run stats` — it prints a warning inside 21 days of expiry.
+
+The weekly report carries the countdown and starts warning at 21 days, so it
+will nag from **2026-10-27**. Don't wait for that.
+
 ## Where things stand
 
-The account posted **31 times (Aug 7 → Aug 31)**, then went **dark for 9 days** —
-the queue drained on Aug 31 and nothing refilled it. The cron kept firing into an
-empty queue the whole time.
-
-Refilled today: **30 posts, Sep 10 → Oct 9, one per day, all Reels.**
-
-## Last 30 days (Aug 10 – Sep 9)
-
-| Format | Posts | Views | Avg | Reach |
-|---|---|---|---|---|
-| Reels | 24 | 1,768 | **73.7** | 1,599 |
-| Static (`/p/`) | 4 | 21 | **5.3** | 10 |
-
-Engagement across all 28: **6 likes, 1 comment, 0 saves, 0 shares.**
-Top performer is still `your-first-move-down-is-your-arms` (137, Aug 10) — nothing
-in the last four weeks has beaten it.
-
-## The finding that drove today's changes
-
-**Two posts a day did not add reach — it split it.**
-
-| Cadence | Period | Views/post | Views/day |
-|---|---|---|---|
-| 1/day | Aug 10–19 | 112.8 | ~113 |
-| 2/day | Aug 24–31 | ~55 | ~110 |
-
-Same daily total, double the production cost. Back to one a day.
-
-**Jokes and tips perform identically.** In the only window where both ran:
-
-| | Posts | Views | Avg | Likes |
-|---|---|---|---|---|
-| Jokes | 8 | 440 | 55.0 | 3 |
-| Tips | 7 | 381 | 54.4 | 2 |
-
-So cutting humor was never a performance question. Kept at ~1/week for variety.
-
-## What's live now
+The account posted 31 times (Aug 7 → Aug 31), then went dark for nine days when
+the queue drained and nothing refilled it. That gap is what drove everything
+below.
 
 | | |
 |---|---|
-| Cron | `cron(0 13,21 * * ? *)` — unchanged, see note below |
-| Posts per firing | 1 (`MAX_POSTS_PER_RUN`) |
-| Queue | 30 posts, Sep 10 → Oct 9, **all Reels**, 26 tips + 4 jokes |
-| Cadence | one post daily at 12:00 UTC (~8am ET), picked up by the 13:00 firing |
+| Queue | **32 posts, Sep 10 → Oct 11**, all Reels, gapless |
+| Mix | 28 tips + 4 jokes (Sep 17, Sep 25, Oct 2, Oct 9) |
+| Cadence | one post daily at 12:00 UTC (~8am ET) |
+| Failed entries | none |
+| Refill | automatic — tops up whenever fewer than 7 remain |
+| Report | emailed Mondays to hlarimer@gmail.com |
 
-**The cron stays twice-daily on purpose.** The poster only takes entries with
-`publishAt <= now` and `status === "pending"`, so the 21:00 firing can never pull
-the next day's post early. It costs one no-op invocation a day and covers the case
-where the 13:00 invocation never runs. One-a-day is enforced by the queue holding
-one entry per day, not by the schedule.
+## What the numbers said
 
-## Changed today
+**Reels beat static posts 14:1.** Over the 30 days to Sep 9: Reels averaged 73.7
+views across 24 posts, static feed posts 5.3 across 4. Carousels and image memes
+are off by default in `stage-week`; `--allow-static` brings them back.
 
-1. **`stage-week.mjs` now stages Reels only.** It was still alternating tips
-   reel ↔ carousel and jokes Reel ↔ image meme — the Aug 23 "carousels are dead"
-   decision never reached the tool. A plain `--count 30` would have staged 13
-   carousels and 2 static memes onto the format averaging 5 views. The old
-   behavior is behind `--allow-static`.
-2. **`stage-week.mjs` won't schedule into the past.** Its default start is "the
-   day after the last queued post"; with the queue 9 days stale that was Sep 1,
-   so every post would have been due at once. Now clamped to tomorrow.
-3. **Replaced 6 generated scripts that repeated existing content.** The generator
-   only sees prior *hooks* for dedupe, and gets the same broad topic string on
-   every chunk, so it converges: three near-identical "pick a landing spot" chip
-   scripts, two identical "punch out of the trees," one restatement of the Aug 8
-   flag-aiming post, one restatement of the Aug 9 fat-chip post, and a third
-   airing of "take one more club and swing easy."
+**Two posts a day split reach rather than adding it.** One a day averaged ~113
+views/day (Aug 10–19); two a day averaged ~110 (Aug 24–31) for double the
+production cost. Hence one a day.
+
+**Jokes and tips perform identically** — 55.0 vs 54.4 avg views in the only
+window where both ran. Humor is an editorial choice, not a reach lever.
+
+**Engagement is the real problem.** 6 likes, 1 comment, 0 saves, 0 shares across
+28 posts. Views without saves or shares give the algorithm nothing to push on.
+Nothing since Aug 10 has beaten `your-first-move-down-is-your-arms` (137 views).
+
+## Hands-off operation
+
+`.github/workflows/keep-queue-full.yml`, two jobs, both verified working:
+
+| Job | When | Does |
+|---|---|---|
+| `topup` | daily 06:00 UTC | tops the queue back to 14 if under 7, commits new scripts |
+| `report` | Mondays 14:00 UTC | emails a week-over-week read written by Claude |
+
+Daily and idempotent on purpose — a no-op six days in seven. A weekly refill
+would still have allowed a nine-day gap.
+
+AWS access is OIDC role assumption; no keys stored in GitHub. The role
+`insta-golf-github-actions` is scoped to this bucket plus `ses:SendEmail` and is
+denied on anything else.
+
+Locally: `npm run ensure:queue -- --dry-run` and `npm run report -- --dry-run`.
 
 ## Repeat detection
 
-The generator dedupes on **hooks**, which only catches repeated wording. It
-never caught the failure that actually happens: the same tip rewritten. The
-first 30-post batch came back 20% reruns, every one with a distinct hook.
+The generator dedupes on **hooks**, which catches repeated wording and nothing
+else. It never caught the failure that actually happens: the same tip rewritten.
+The first 30-post batch came back 20% reruns, every one with a distinct hook.
 
-`npm run dedupe` now screens on the whole script in two stages — a lexical pass
-shortlists the most similar existing scripts, then Claude judges only that
-shortlist. Measured against the six duplicates caught by hand, the shortlist has
-**100% recall at 5** and the judge caught **6 of 6**. A similarity threshold on
-its own cannot work: real duplicates score 0.22–0.57 and legitimate pairs reach
-0.58, so the ranges overlap completely. That's why the second stage is semantic.
+`npm run dedupe` screens the whole script in two stages — a lexical pass
+shortlists the closest existing scripts, then Claude judges only that shortlist.
+Both stages are needed: the shortlist gets 100% recall at 5 and the judge caught
+6 of 6 known duplicates, but no threshold can separate them, because real
+duplicates score 0.22–0.57 while legitimate pairs reach 0.58.
 
-Pointed at the live queue it found **9 duplicates in 30 posts**, including three
-the hand review missed. After replacement the queue is down to one borderline
-flag, kept deliberately: it repeats the Aug 7 static post that got 4 views.
+Pointed at the live queue it found 9 duplicates in 30 posts, three of which a
+careful hand review had missed. `stage-week` runs the same check between
+generating and rendering, so the unattended path can't queue a rerun.
 
-`stage-week` runs the same check after generating and before rendering, so the
-unattended path can't queue a rerun. Escape hatch is `--no-dedupe`.
+One flag is knowingly left standing: `lag-putt-to-a-bucket` resembles the Aug 7
+post that got 4 views. Nobody saw the original.
 
-Only compares against scripts that are published or queued — a script that never
-aired (like `your-driver-is-teed-too-low`, which failed on 2026-08-21) is not a
-rerun to anyone.
+## Known gaps
+
+**Remotion has never rendered on a GitHub runner.** Both jobs pass, but `topup`
+short-circuits while the queue is full, so the render path stays untested until
+the queue crosses below 7 on **2026-10-05**. Worth forcing a real staging run
+before then rather than discovering it that morning.
+
+**A failed post leaves a silent hole.** The poster marks an entry `failed` and
+moves on; `ensure-queue` reports failures but doesn't backfill the lost day.
+
+**Content still clusters by topic.** Generating a month against one topic string
+leans the queue toward whatever the model reaches for first. Give each week its
+own `--topic` when staging by hand.
+
+## Costs
+
+Negligible: roughly 7 Claude generations plus ~$0.20 of fal.ai images per
+top-up, one Claude call for the weekly read, and ~60 of GitHub's 2,000 free
+Actions minutes a month.
