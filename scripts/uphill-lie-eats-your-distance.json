@@ -1,0 +1,24 @@
+{
+  "slug": "uphill-lie-eats-your-distance",
+  "kind": "tip",
+  "hook": "Uphill lie makes the ball balloon and come up short.",
+  "beats": [
+    "The slope adds loft, so a 7-iron flies like a 9.",
+    "Take two more clubs than the number says.",
+    "Set your shoulders to match the slope, not level.",
+    "Lean into the hill with weight on your lower foot.",
+    "Swing up the slope and let it climb."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 40
+    },
+    null,
+    null
+  ],
+  "brollSrc": "broll/uphill-lie-eats-your-distance.png",
+  "audioSrc": null
+}

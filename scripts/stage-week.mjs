@@ -27,19 +27,24 @@
  *                     reel); only meaningful with --allow-static
  *   --backgrounds     also generate an AI background per post (needs FAL_KEY;
  *                     costs ~1–4¢/image). Diagrams are automatic either way.
+ *   --no-dedupe       skip the repeat check. Don't: the generator only dedupes
+ *                     on hooks, so it happily rewrites tips the account has
+ *                     already given.
  *
  * Reuses the existing generate / render / render:carousel / render:meme /
  * enqueue tools, so behavior stays identical to running them by hand.
  */
 import { spawnSync } from "node:child_process";
-import { readdirSync, existsSync, renameSync, rmdirSync } from "node:fs";
+import { readdirSync, existsSync, renameSync, rmdirSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { makeS3, getJson } from "./lib/s3.mjs";
+import { loadCorpus, judgeDuplicates } from "./lib/dedupe.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
 const draftsDir = join(scriptsDir, "drafts");
+const rejectedDir = join(scriptsDir, "rejected");
 
 if (existsSync(join(root, ".env"))) {
   try {
@@ -62,6 +67,7 @@ const startArg = opt("start", null);
 const utcHour = parseInt(opt("utc-hour", "12"), 10);
 const startFormat = opt("start-format", "reel") === "carousel" ? "carousel" : "reel";
 const allowStatic = argv.includes("--allow-static");
+const skipDedupe = argv.includes("--no-dedupe");
 const backgrounds = argv.includes("--backgrounds");
 const humorCount = Math.max(
   0,
@@ -113,17 +119,87 @@ try {
   /* leave non-empty drafts dir */
 }
 
+// ---- 1b. reject anything that repeats advice already out there -----------
+// The generator dedupes on hooks, which catches repeated wording and nothing
+// else. Left alone it reruns tips in different words — a 30-post batch on
+// 2026-09-09 came back 20% reruns. Checking here, before rendering, means a
+// duplicate costs one cheap API call instead of a wasted render and a slot on
+// the calendar.
+const s3 = makeS3(process.env.AWS_REGION);
+const queueNow = (await getJson(s3, {
+  bucket: process.env.S3_BUCKET,
+  key: process.env.CLOUD_QUEUE_KEY ?? "queue.json",
+})) ?? { entries: [] };
+
+async function dropRepeats(slugs, kind, subject) {
+  if (skipDedupe || slugs.length === 0) return slugs;
+  const { default: Anthropic } = await import("@anthropic-ai/sdk");
+  const client = new Anthropic();
+  const fresh = new Set(slugs);
+
+  // Compare only against what viewers have seen or are scheduled to see, plus
+  // the rest of this batch — orphaned drafts aren't reruns to anyone.
+  const live = new Set(
+    queueNow.entries
+      .filter((e) => e.status === "published" || e.status === "pending")
+      .map((e) => e.slug),
+  );
+  const postedAt = new Map(
+    queueNow.entries.filter((e) => e.postedAt).map((e) => [e.slug, e.postedAt]),
+  );
+  const corpus = loadCorpus([scriptsDir]).filter((c) => live.has(c.slug) || fresh.has(c.slug));
+  for (const c of corpus) c.postedAt = postedAt.get(c.slug) ?? null;
+
+  let current = [...slugs];
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const candidates = corpus.filter((c) => current.includes(c.slug));
+    const verdicts = await judgeDuplicates({ client, candidates, corpus });
+    const bad = new Set(verdicts.filter((v) => v.duplicate).map((v) => v.slug));
+    if (bad.size === 0) break;
+
+    for (const v of verdicts.filter((v) => v.duplicate)) {
+      console.log(`   ♻️  ${v.slug} repeats ${v.of} — regenerating`);
+    }
+    // File the repeats away so the generator can see them and avoid the ground.
+    mkdirSync(rejectedDir, { recursive: true });
+    for (const slug of bad) {
+      renameSync(join(scriptsDir, `${slug}.json`), join(rejectedDir, `${slug}.json`));
+    }
+    if (attempt === 2) {
+      console.log(`   ⚠️  still repeating after a retry — staging ${current.length - bad.size} instead`);
+      current = current.filter((s) => !bad.has(s));
+      break;
+    }
+    const replacements = generate(bad.size, kind, `${subject}. Avoid anything resembling: ` +
+      [...bad].join(", "));
+    current = [...current.filter((s) => !bad.has(s)), ...replacements];
+    for (const slug of replacements) {
+      const c = loadCorpus([scriptsDir]).find((x) => x.slug === slug);
+      if (c) corpus.push({ ...c, postedAt: null });
+    }
+  }
+  return current;
+}
+
+console.log("\n①b Checking for repeats…");
+const checkedTips = await dropRepeats(tipSlugs, "tip", topic);
+const checkedJokes = await dropRepeats(jokeSlugs, "joke", humorTopic);
+
+// Dedupe can hand back fewer scripts than were asked for (a repeat that stayed
+// a repeat after its retry is dropped rather than shipped). Plan against what
+// actually survived, or the loop below indexes off the end of the list.
+const effHumor = checkedJokes.length;
+const effCount = checkedTips.length + effHumor;
+if (effCount < count) {
+  console.log(`   staging ${effCount} of the ${count} asked for — the rest were unfixable repeats`);
+}
+
 // ---- 2. compute the schedule (append after the last queued post) ----------
 let start;
 if (startArg) {
   start = new Date(`${startArg}T00:00:00Z`);
 } else {
-  const s3 = makeS3(process.env.AWS_REGION);
-  const queue = (await getJson(s3, {
-    bucket: process.env.S3_BUCKET,
-    key: process.env.CLOUD_QUEUE_KEY ?? "queue.json",
-  })) ?? { entries: [] };
-  const maxIso = queue.entries.reduce((m, e) => (e.publishAt > m ? e.publishAt : m), "");
+  const maxIso = queueNow.entries.reduce((m, e) => (e.publishAt > m ? e.publishAt : m), "");
   const base = maxIso ? new Date(maxIso) : new Date();
   start = new Date(base.getTime() + 86400000); // day after the last post
   // If the queue has been drained for a while, that day is in the past and
@@ -141,14 +217,14 @@ const plan = [];
 let placedHumor = 0;
 let tipIdx = 0;
 let jokeIdx = 0;
-for (let i = 0; i < count; i++) {
-  const isHumor = Math.floor(((i + 1) * humorCount) / count) > placedHumor;
+for (let i = 0; i < effCount; i++) {
+  const isHumor = Math.floor(((i + 1) * effHumor) / effCount) > placedHumor;
   const when = new Date(start);
   when.setUTCDate(start.getUTCDate() + i);
   if (isHumor) {
     placedHumor++;
     plan.push({
-      slug: jokeSlugs[jokeIdx],
+      slug: checkedJokes[jokeIdx],
       role: allowStatic && jokeIdx % 2 === 1 ? "meme" : "joke",
       iso: when.toISOString(),
     });
@@ -161,7 +237,7 @@ for (let i = 0; i < count; i++) {
           ? "carousel"
           : "reel"
       : "reel";
-    plan.push({ slug: tipSlugs[tipIdx], role: flip, iso: when.toISOString() });
+    plan.push({ slug: checkedTips[tipIdx], role: flip, iso: when.toISOString() });
     tipIdx++;
   }
 }

@@ -1,0 +1,26 @@
+{
+  "slug": "stop-keeping-your-head-down",
+  "kind": "tip",
+  "hook": "Stop trying to keep your head down.",
+  "beats": [
+    "That advice makes you freeze and chunk it.",
+    "The real fault: you're stuck on your back foot at impact.",
+    "Let your head rotate with the shot, and shift into your lead side.",
+    "Feel your chest cover the ball as you turn through.",
+    "Solid contact comes from moving forward, not staring down.",
+    "Head goes where the swing takes it. Free it up."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 65
+    },
+    null,
+    null,
+    null,
+    null
+  ],
+  "brollSrc": "broll/stop-keeping-your-head-down.png",
+  "audioSrc": null
+}

@@ -22,7 +22,8 @@
     "render:raw": "remotion render",
     "upgrade": "remotion upgrade",
     "ensure:queue": "node scripts/ensure-queue.mjs",
-    "report": "node scripts/stats-report.mjs"
+    "report": "node scripts/stats-report.mjs",
+    "dedupe": "node scripts/dedupe-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -1,0 +1,14 @@
+{
+  "slug": "your-ball-is-on-pine-straw",
+  "kind": "tip",
+  "hook": "Ball's sitting on pine straw in the trees.",
+  "beats": [
+    "First rule: do not ground your club behind it.",
+    "One brush and the ball moves, that's a penalty.",
+    "Hover the clubhead and take less loft than usual.",
+    "Punch it low and out to the fairway, no heroics.",
+    "Get it back in play and you saved two shots."
+  ],
+  "brollSrc": "broll/your-ball-is-on-pine-straw.png",
+  "audioSrc": null
+}

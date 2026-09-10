@@ -1,0 +1,14 @@
+{
+  "slug": "your-ball-is-in-a-divot",
+  "kind": "tip",
+  "hook": "Your ball rolled into a divot. Rotten luck, easy fix.",
+  "beats": [
+    "Don't try to sweep it out like a normal lie.",
+    "Play it back in your stance, hands ahead of the ball.",
+    "Lean the shaft forward and hit down on it.",
+    "Expect it low and hot with a little extra run.",
+    "One less club because it won't spin or stop."
+  ],
+  "brollSrc": "broll/your-ball-is-in-a-divot.png",
+  "audioSrc": null
+}

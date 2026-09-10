@@ -73,8 +73,26 @@ one entry per day, not by the schedule.
    flag-aiming post, one restatement of the Aug 9 fat-chip post, and a third
    airing of "take one more club and swing easy."
 
-## Known weakness
+## Repeat detection
 
-Generating a month on one topic string produces topic clusters. The 30 queued
-posts still lean putting-heavy (6 of 26 tips). If this is repeated, give each
-week its own `--topic` rather than reusing the default.
+The generator dedupes on **hooks**, which only catches repeated wording. It
+never caught the failure that actually happens: the same tip rewritten. The
+first 30-post batch came back 20% reruns, every one with a distinct hook.
+
+`npm run dedupe` now screens on the whole script in two stages — a lexical pass
+shortlists the most similar existing scripts, then Claude judges only that
+shortlist. Measured against the six duplicates caught by hand, the shortlist has
+**100% recall at 5** and the judge caught **6 of 6**. A similarity threshold on
+its own cannot work: real duplicates score 0.22–0.57 and legitimate pairs reach
+0.58, so the ranges overlap completely. That's why the second stage is semantic.
+
+Pointed at the live queue it found **9 duplicates in 30 posts**, including three
+the hand review missed. After replacement the queue is down to one borderline
+flag, kept deliberately: it repeats the Aug 7 static post that got 4 views.
+
+`stage-week` runs the same check after generating and before rendering, so the
+unattended path can't queue a rerun. Escape hatch is `--no-dedupe`.
+
+Only compares against scripts that are published or queued — a script that never
+aired (like `your-driver-is-teed-too-low`, which failed on 2026-08-21) is not a
+rerun to anyone.
