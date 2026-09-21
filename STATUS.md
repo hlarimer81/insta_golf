@@ -1,10 +1,10 @@
 # insta-golf — status
 
-_Last updated: 2026-09-09_
+_Last updated: 2026-09-21_
 
 ## ⚠️ Action required: roll the Instagram credential
 
-**The token's data access expires 2026-11-17 — 68 days out.**
+**The token's data access expires 2026-11-17 — 56 days out.**
 
 The token itself is a PAGE token and never expires, so nothing looks wrong until
 the day it stops. When data access lapses, insights reads and publishing both
@@ -33,14 +33,14 @@ will nag from **2026-10-27**. Don't wait for that.
 
 ## Where things stand
 
-The account posted 31 times (Aug 7 → Aug 31), then went dark for nine days when
-the queue drained and nothing refilled it. That gap is what drove everything
-below.
+The account posted 31 times (Aug 7 → Aug 31), went dark for nine days when the
+queue drained, resumed Sep 10 and has posted daily since.
 
 | | |
 |---|---|
-| Queue | **32 posts, Sep 10 → Oct 11**, all Reels, gapless |
-| Mix | 28 tips + 4 jokes (Sep 17, Sep 25, Oct 2, Oct 9) |
+| Published | 43 posts |
+| Queue | **20 posts, Sep 22 → Oct 11**, all Reels, gapless |
+| Mix | 17 tips + 3 jokes |
 | Cadence | one post daily at 12:00 UTC (~8am ET) |
 | Failed entries | none |
 | Refill | automatic — tops up whenever fewer than 7 remain |
@@ -48,20 +48,31 @@ below.
 
 ## What the numbers said
 
-**Reels beat static posts 14:1.** Over the 30 days to Sep 9: Reels averaged 73.7
-views across 24 posts, static feed posts 5.3 across 4. Carousels and image memes
-are off by default in `stage-week`; `--allow-static` brings them back.
+**The nine-day gap cost about 70% of reach, and it took eight days to win
+back.** Sep 10–16 averaged 22.9 views a post against an August Reels baseline of
+77.2. Sep 17–21 averaged 77.6 — back to par. The recovery is understated by the
+raw average, because views accumulate and the three strongest posts in the
+window were the three *newest*: 113, 112 and 92 views at 0–2 days old, while the
+5–11 day old posts had plateaued at 4–61.
+
+**Reels beat static posts 14:1**, and the five worst August posts were exactly
+the five static ones (2–9 views). Turning static off removed the entire bottom
+of the distribution. Carousels and image memes stay off by default in
+`stage-week`; `--allow-static` brings them back.
 
 **Two posts a day split reach rather than adding it.** One a day averaged ~113
 views/day (Aug 10–19); two a day averaged ~110 (Aug 24–31) for double the
 production cost. Hence one a day.
 
-**Jokes and tips perform identically** — 55.0 vs 54.4 avg views in the only
-window where both ran. Humor is an editorial choice, not a reach lever.
+**Jokes and tips perform identically** — 55.0 vs 54.4 avg views. Humor is an
+editorial choice, not a reach lever.
 
-**Engagement is the real problem.** 6 likes, 1 comment, 0 saves, 0 shares across
-28 posts. Views without saves or shares give the algorithm nothing to push on.
-Nothing since Aug 10 has beaten `your-first-move-down-is-your-arms` (137 views).
+**Engagement moved for the first time, from almost nothing.** Likes per 100
+views went 0.34 → 1.64 across Sep 10–21, and Sep 10 logged the account's first
+ever save. In absolute terms that is 9 likes, 1 save, 1 share and **still zero
+comments** over 12 posts. The direction reversed; the magnitude is near zero.
+This remains the real problem — views without saves or shares give the algorithm
+nothing to push on.
 
 ## Hands-off operation
 
@@ -69,7 +80,7 @@ Nothing since Aug 10 has beaten `your-first-move-down-is-your-arms` (137 views).
 
 | Job | When | Does |
 |---|---|---|
-| `topup` | daily 06:00 UTC | tops the queue back to 14 if under 7, commits new scripts |
+| `topup` | daily 06:00 UTC | generates beds, tops the queue back to 14 if under 7, commits new scripts |
 | `report` | Mondays 14:00 UTC | emails a week-over-week read written by Claude |
 
 Daily and idempotent on purpose — a no-op six days in seven. A weekly refill
@@ -80,6 +91,49 @@ AWS access is OIDC role assumption; no keys stored in GitHub. The role
 denied on anything else.
 
 Locally: `npm run ensure:queue -- --dry-run` and `npm run report -- --dry-run`.
+
+## Captions and hashtags
+
+Every caption ends with a house set plus tags specific to that post, specific
+ones first. The specific tags come from the script's `hashtags` field where the
+generator wrote one, and otherwise from keyword matching — **tips only**, since
+a joke mentions golf nouns in passing rather than being about them, and a
+confidently wrong niche tag is worse than none.
+
+Broad tags like `#golf` are far too large for an account this size to surface
+in. The specific ones are the only ones a search can plausibly reach, which is
+the whole point of the change.
+
+`npm run recaption` rebuilds captions on pending entries, because captions are
+baked in at enqueue time and a change otherwise reaches nothing already
+scheduled. Run against the live queue on Sep 21: 17 of 20 updated, the 3
+untouched being jokes.
+
+## Music
+
+Reels were silent until Sep 21. They now carry one of four beds —
+`fairway-morning`, `range-session`, `back-nine`, `clubhouse` — assigned by slug
+hash so a re-render never swaps one.
+
+The beds are **original compositions generated by `npm run beds`**, not licensed
+recordings. That is deliberate: Instagram's trending-audio library is
+unreachable through the Content Publishing API, so any track is baked into the
+MP4, and baked-in audio on a business account is a rights question whose failure
+mode is muting or a publish restriction that announces itself to nobody. Music
+written here has no rights question — the account owns it.
+
+Being generated also means CI needs no track hosting: output is deterministic
+and `public/audio/*` is git-ignored, so the runner regenerates the beds exactly
+as `scripts/bg.mjs` regenerates b-roll.
+
+All 20 queued Reels were re-rendered and re-uploaded on Sep 21 to pick up their
+beds. Audio is baked in at render time, so `npm run rerender` is the only way to
+score something already queued; it is resumable and takes a couple of minutes a
+Reel.
+
+**There is no read on whether music helps yet.** Per-post variance is enormous
+(August ranged 2–137 views on similar content), so separating a modest lift from
+noise at one post a day takes weeks, not days. Treat an early result as noise.
 
 ## Repeat detection
 
@@ -97,25 +151,33 @@ Pointed at the live queue it found 9 duplicates in 30 posts, three of which a
 careful hand review had missed. `stage-week` runs the same check between
 generating and rendering, so the unattended path can't queue a rerun.
 
-One flag is knowingly left standing: `lag-putt-to-a-bucket` resembles the Aug 7
-post that got 4 views. Nobody saw the original.
+`lag-putt-to-a-bucket`, the one flag knowingly left standing, posted Sep 12 and
+took 61 views — the best of that week. The gamble cost nothing.
 
 ## Known gaps
 
 **Remotion has never rendered on a GitHub runner.** Both jobs pass, but `topup`
 short-circuits while the queue is full, so the render path stays untested until
-the queue crosses below 7 on **2026-10-05**. Worth forcing a real staging run
-before then rather than discovering it that morning.
+the queue crosses below 7 on **2026-10-05**. The `npm run beds` step is on that
+same cold path. A manual `workflow_dispatch` with `job: topup` exercises both
+without sending a report email — worth doing before Oct 5 rather than finding
+out that morning.
 
 **A failed post leaves a silent hole.** The poster marks an entry `failed` and
-moves on; `ensure-queue` reports failures but doesn't backfill the lost day.
+moves on; `ensure-queue` reports failures but doesn't backfill the lost day. The
+weekly report now at least names days with no post.
 
 **Content still clusters by topic.** Generating a month against one topic string
 leans the queue toward whatever the model reaches for first. Give each week its
 own `--topic` when staging by hand.
 
+**Engagement is still the unsolved one.** Nothing shipped so far targets saves,
+shares or comments — hashtags widen who sees a post, music affects watch time at
+best. Neither asks anyone to do anything.
+
 ## Costs
 
 Negligible: roughly 7 Claude generations plus ~$0.20 of fal.ai images per
 top-up, one Claude call for the weekly read, and ~60 of GitHub's 2,000 free
-Actions minutes a month.
+Actions minutes a month. The music beds are synthesized locally and cost
+nothing.
