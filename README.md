@@ -372,19 +372,28 @@ in; the specific ones are the ones a search can plausibly reach.
 
 ## Music
 
-New scripts get a background bed from `public/audio/` if any tracks are
-installed, assigned deterministically by slug so a re-render never swaps it. No
-tracks installed means silent Reels, which is the safe default — pointing
-`audioSrc` at a file that isn't there fails the render.
+Scripts get a background bed assigned by slug hash, so a re-render never swaps
+a Reel's music.
 
 **Instagram's trending-audio library cannot be used here.** It is unreachable
-through the Content Publishing API, so every track must be baked into the MP4
-and therefore cleared for commercial use on a business account. Full policy and
-sourcing in [`public/audio/README.md`](public/audio/README.md).
+through the Content Publishing API, so every track is baked into the MP4 — which
+makes music a licensing question, and a narrower one on a business account.
 
-Because `public/audio/*` is git-ignored, a GitHub runner has no local tracks —
-set the repo variable `BOGEY_AUDIO_TRACKS` to comma-separated URLs to score
-unattended renders. It takes precedence over local files.
+The beds sidestep that: `npm run beds` writes four ~38s loops that are
+**original compositions generated in this repo** (`scripts/make-beds.mjs`), so
+the account owns them outright. Output is deterministic, and `public/audio/*` is
+git-ignored, so CI regenerates them per run exactly as `scripts/bg.mjs`
+regenerates b-roll — no hosting, no repo variable. To use a licensed library
+instead, drop files in `public/audio/` or point `BOGEY_AUDIO_TRACKS` at their
+URLs. Details in [`public/audio/README.md`](public/audio/README.md).
+
+An empty pool means silent Reels, which is the safe default — pointing
+`audioSrc` at a file that isn't there fails the render.
+
+Audio is baked in at render time, so adding music to something already queued
+means re-rendering it: `npm run rerender` scores pending Reels, re-renders and
+replaces the uploaded video, leaving captions and video keys alone. It is
+resumable and takes a couple of minutes per Reel.
 
 Default pacing is deliberately unhurried — 3s on the hook, 3s per beat, 4s on a
 punchline, 2.5s on the sign-off — so every card is readable without pausing. A
