@@ -23,7 +23,10 @@
     "upgrade": "remotion upgrade",
     "ensure:queue": "node scripts/ensure-queue.mjs",
     "report": "node scripts/stats-report.mjs",
-    "dedupe": "node scripts/dedupe-check.mjs"
+    "dedupe": "node scripts/dedupe-check.mjs",
+    "recaption": "node scripts/recaption-queue.mjs",
+    "beds": "node scripts/make-beds.mjs",
+    "rerender": "node scripts/rerender-queue.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -52,10 +52,20 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # public/audio is git-ignored, so this runner starts with no beds. They
+      # are generated rather than licensed, so regenerate them here the same
+      # way scripts/bg.mjs regenerates b-roll. Deterministic, so a Reel scored
+      # on a laptop and one scored here get the same music.
+      - name: Generate the music beds
+        run: npm run beds
+
       - name: Top up if the queue is below a week
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FAL_KEY: ${{ secrets.FAL_KEY }}
+          # Optional override: set this repo variable to licensed track URLs
+          # to use those instead of the generated beds.
+          BOGEY_AUDIO_TRACKS: ${{ vars.BOGEY_AUDIO_TRACKS }}
         run: npm run ensure:queue -- --min 7 --target 14
 
       # Generated scripts must land back in the repo: the generator dedupes

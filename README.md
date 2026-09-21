@@ -340,10 +340,60 @@ Prefer to write one by hand? One JSON file per Reel in `scripts/`. Minimal examp
 
 Optional fields: `kind` (`"tip"`, the default, or `"joke"`), `punchline` (the
 payoff line on a joke — held after the beats in a Reel, and the bottom line of a
-meme), `signoff` (defaults to the Bogey signature), `brollSrc` and `audioSrc` (a
-URL, or a path under `public/broll` / `public/audio`), and pacing overrides
-`hookSeconds` / `secondsPerBeat` / `punchSeconds` / `signoffSeconds`. Full shape
-and defaults live in `src/schema.ts`.
+meme), `signoff` (defaults to the Bogey signature), `hashtags` (topic tags for
+the caption — see [Hashtags](#hashtags)), `brollSrc` and `audioSrc` (a URL, or a
+path under `public/broll` / `public/audio`), and pacing overrides `hookSeconds` /
+`secondsPerBeat` / `punchSeconds` / `signoffSeconds`. Full shape and defaults
+live in `src/schema.ts`.
+
+## Hashtags
+
+Every caption ends with a house set (`#golf #golftips …`, overridable via
+`IG_HASHTAGS` / `IG_HASHTAGS_HUMOR`) plus tags specific to that post. The
+specific ones lead, duplicates are dropped.
+
+They come from one of two places, resolved in `buildCaption`
+(`scripts/lib/instagram.mjs`):
+
+1. the script's own `hashtags` field, written by the generator against the
+   actual content — this is the good path;
+2. failing that, keyword matching on the script's text, which covers the
+   scripts written before the field existed.
+
+The fallback is **tips only, deliberately**. A tip is about the technique it
+names, so its words are fair signal. A joke only mentions golf nouns in
+passing — `im-due-optimism` lists a shank, a three-putt and a provisional while
+being about none of them — and a confidently wrong niche tag is worse than no
+tag, since it puts the post in front of people looking for something else.
+Jokes keep the humor set, which already fits them.
+
+Broad tags like `#golf` are far too large for an account this size to surface
+in; the specific ones are the ones a search can plausibly reach.
+
+## Music
+
+Scripts get a background bed assigned by slug hash, so a re-render never swaps
+a Reel's music.
+
+**Instagram's trending-audio library cannot be used here.** It is unreachable
+through the Content Publishing API, so every track is baked into the MP4 — which
+makes music a licensing question, and a narrower one on a business account.
+
+The beds sidestep that: `npm run beds` writes four ~38s loops that are
+**original compositions generated in this repo** (`scripts/make-beds.mjs`), so
+the account owns them outright. Output is deterministic, and `public/audio/*` is
+git-ignored, so CI regenerates them per run exactly as `scripts/bg.mjs`
+regenerates b-roll — no hosting, no repo variable. To use a licensed library
+instead, drop files in `public/audio/` or point `BOGEY_AUDIO_TRACKS` at their
+URLs. Details in [`public/audio/README.md`](public/audio/README.md).
+
+An empty pool means silent Reels, which is the safe default — pointing
+`audioSrc` at a file that isn't there fails the render.
+
+Audio is baked in at render time, so adding music to something already queued
+means re-rendering it: `npm run rerender` scores pending Reels, re-renders and
+replaces the uploaded video, leaving captions and video keys alone. It is
+resumable and takes a couple of minutes per Reel.
 
 Default pacing is deliberately unhurried — 3s on the hook, 3s per beat, 4s on a
 punchline, 2.5s on the sign-off — so every card is readable without pausing. A

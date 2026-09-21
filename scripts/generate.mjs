@@ -18,6 +18,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
+import { normalizeTags } from "./lib/instagram.mjs";
+import { availableTracks, pickTrack } from "./lib/audio.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -183,8 +185,19 @@ const schema = {
               ],
             },
           },
+          hashtags: {
+            type: "array",
+            description:
+              "3-4 Instagram hashtags specific to THIS script's subject, lowercase, no spaces, " +
+              "no # prefix — e.g. putting, bunkershot, chipping, ironplay, coursemanagement. " +
+              "Caption metadata only; these never appear on screen, so the 'no hashtags' voice " +
+              "rule does not apply here. Pick what a golfer searching for this exact problem " +
+              "would follow. Do NOT include broad tags like golf, golftips, golfswing, golflife " +
+              "or golftok — those are appended automatically.",
+            items: { type: "string" },
+          },
         },
-        required: ["slug", "hook", "beats", "visuals"],
+        required: ["slug", "hook", "beats", "visuals", "hashtags"],
       },
     },
   },
@@ -215,8 +228,18 @@ const jokeSchema = {
             type: "string",
             description: "the payoff line — must land directly after the setup on its own",
           },
+          hashtags: {
+            type: "array",
+            description:
+              "3-4 Instagram hashtags specific to THIS joke's subject, lowercase, no spaces, " +
+              "no # prefix — e.g. bunkershot, provisional, rangeday, slowplay. Caption metadata " +
+              "only; these never appear on screen, so the 'no hashtags' voice rule does not " +
+              "apply here. Do NOT include broad tags like golf, golfmemes, golfhumor, golflife " +
+              "or golfproblems — those are appended automatically.",
+            items: { type: "string" },
+          },
         },
-        required: ["slug", "hook", "beats", "punchline"],
+        required: ["slug", "hook", "beats", "punchline", "hashtags"],
       },
     },
   },
@@ -280,6 +303,14 @@ const uniqueDraftPath = (slug) => {
 
 mkdirSync(draftsDir, { recursive: true });
 
+const tracks = availableTracks();
+if (!tracks.length) {
+  console.log(
+    "🔇  No tracks in public/audio/ — drafts will be silent.\n" +
+      "    Add commercially cleared music there to score new Reels (see public/audio/README.md).",
+  );
+}
+
 let written = 0;
 for (const s of scripts) {
   if (!s.hook || !Array.isArray(s.beats) || s.beats.length === 0) {
@@ -293,6 +324,7 @@ for (const s of scripts) {
     continue;
   }
   const visuals = Array.isArray(s.visuals) ? s.visuals : [];
+  const hashtags = normalizeTags(s.hashtags);
   const reel = {
     slug: slug,
     kind,
@@ -301,8 +333,12 @@ for (const s of scripts) {
     // Only carry visuals when at least one beat has a diagram.
     ...(visuals.some((v) => v) ? { visuals } : {}),
     ...(isJoke ? { punchline: s.punchline } : {}),
+    // Topic tags for the caption. buildCaption falls back to keyword matching
+    // when this is absent, so older scripts still get something sensible.
+    ...(hashtags.length ? { hashtags } : {}),
     brollSrc: null,
-    audioSrc: null,
+    // A cleared bed from public/audio/, or null when none are installed.
+    audioSrc: pickTrack(slug, tracks),
   };
   writeFileSync(outPath, JSON.stringify(reel, null, 2) + "\n");
   console.log(
