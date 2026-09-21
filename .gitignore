@@ -15,3 +15,5 @@ public/broll/*
 public/audio/*
 !public/broll/.gitkeep
 !public/audio/.gitkeep
+# The music policy needs to travel with the repo, unlike the tracks themselves.
+!public/audio/README.md

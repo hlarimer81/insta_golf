@@ -56,6 +56,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FAL_KEY: ${{ secrets.FAL_KEY }}
+          # public/audio/ is git-ignored, so this runner has no local tracks.
+          # Cleared music beds reach a render here as URLs. Unset = silent
+          # Reels, which is the safe default (see public/audio/README.md).
+          BOGEY_AUDIO_TRACKS: ${{ vars.BOGEY_AUDIO_TRACKS }}
         run: npm run ensure:queue -- --min 7 --target 14
 
       # Generated scripts must land back in the repo: the generator dedupes
