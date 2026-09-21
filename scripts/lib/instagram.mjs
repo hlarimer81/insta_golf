@@ -13,6 +13,8 @@
  * size to surface in; these are the ones a search can plausibly reach.
  */
 const TOPIC_TAGS = [
+  [/\brange\b|practice|warm ?up/i, ["#golfpractice"]],
+  [/first tee|nerves|pressure|confidence|heart rate/i, ["#golfmentalgame"]],
   [/fried egg|bunker|\bsand\b/i, ["#bunkershot", "#shortgame"]],
   [/\bputt|three-putt|green read/i, ["#putting", "#shortgame"]],
   [/\bchip|pitch shot|pitching\b|around the green/i, ["#chipping", "#shortgame"]],
@@ -22,9 +24,7 @@ const TOPIC_TAGS = [
   [/\bdriver\b|off the tee|\btee it\b|tee box/i, ["#driving", "#teeshot"]],
   [/\biron\b|\birons\b|approach|into the green/i, ["#ironplay"]],
   [/\bgrip|\bglove\b/i, ["#golfgrip"]],
-  [/\brange\b|practice|warm ?up/i, ["#golfpractice"]],
-  [/first tee|nerves|pressure|confidence|heart rate/i, ["#golfmentalgame"]],
-  [/provisional|course management|play for your miss|penalty|\bscore\b/i, ["#coursemanagement"]],
+  [/provisional|course management|play for your miss|penalty|\bscore\b|\bwind\b|crosswind|\bbreeze/i, ["#coursemanagement"]],
   [/\bswing|backswing|downswing|takeaway|\btempo\b/i, ["#golfswing"]],
   [/\bstance|\balign|\baim\b|ball position/i, ["#golfsetup"]],
   [/\brough\b|\bdivot\b|pine straw|uphill|downhill/i, ["#troubleshot"]],
