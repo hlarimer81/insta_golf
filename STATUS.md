@@ -39,8 +39,8 @@ queue drained, resumed Sep 10 and has posted daily since.
 | | |
 |---|---|
 | Published | 43 posts |
-| Queue | **20 posts, Sep 22 → Oct 11**, all Reels, gapless |
-| Mix | 17 tips + 3 jokes |
+| Queue | **21 posts, Sep 22 → Oct 12**, all Reels, gapless |
+| Mix | 17 tips + 4 jokes |
 | Cadence | one post daily at 12:00 UTC (~8am ET) |
 | Failed entries | none |
 | Refill | automatic — tops up whenever fewer than 7 remain |
@@ -156,22 +156,18 @@ took 61 views — the best of that week. The gamble cost nothing.
 
 ## Known gaps
 
-**Remotion has never rendered on a GitHub runner.** Both jobs pass, but `topup`
-short-circuits while the queue is full, so the render path stays untested until
-the queue crosses below 7 on **2026-10-05**. The `npm run beds` step is on that
-same cold path.
+**~~Remotion has never rendered on a GitHub runner.~~ Closed 2026-09-21.** A
+dispatch with `min: 21, target: 21` staged one post and ran the whole path on
+Ubuntu — generate → dedupe → fal.ai b-roll → render → S3 upload → enqueue —
+producing `you-fixed-your-swing-on-youtube` for Oct 12. The rendered file was
+pulled back from S3 and checked: 1080x1920, 30fps, h264 + AAC. `npm run beds`
+ran there too and the `libmp3lame` encode worked, so the script got
+`audio/range-session.mp3` rather than the `.wav` fallback. `BOGEY_AUDIO_TRACKS`
+was empty, confirming the generated beds are found without hosted URLs.
 
-A dispatch with `job: topup` alone does **not** close this. With 20 posts
-queued, `ensure-queue` is at or above its floor and exits before reaching a
-render. It still proves `npm ci`, the Remotion browser download, the beds step
-and OIDC role assumption on Ubuntu, which is worth having, but not the render.
-
-To force a real one, dispatch with `min` above the number already queued —
-`job: topup`, `min: 21`, `target: 22` stages two posts and runs the whole
-generate → dedupe → b-roll → render → enqueue path on the runner. Those two are
-real posts and stay in the queue, so the test costs nothing beyond the Actions
-minutes. Keep `job` off `both`, which also sends a report email. The daily
-schedule ignores `min`/`target` and stays at 7/14.
+The dispatch inputs stay useful: `min` above the number already queued forces a
+real render whenever the path needs re-proving, and the daily schedule ignores
+them at 7/14. Keep `job` on `topup` — `both` also sends a report email.
 
 **A failed post leaves a silent hole.** The poster marks an entry `failed` and
 moves on; `ensure-queue` reports failures but doesn't backfill the lost day. The
@@ -184,6 +180,18 @@ own `--topic` when staging by hand.
 **Engagement is still the unsolved one.** Nothing shipped so far targets saves,
 shares or comments — hashtags widen who sees a post, music affects watch time at
 best. Neither asks anyone to do anything.
+
+## Keeping the automation current
+
+Action versions are pinned to the **lowest** major that runs on Node 24, not the
+newest: Node 20 deprecation on runners is the only reason to move, and every
+further major carries breaking changes this pipeline gains nothing from.
+`checkout` and `setup-node` reached Node 24 at v5; `configure-aws-credentials`
+only at v6, since its v5 is still Node 20. Verified against each action's
+`action.yml` rather than its release notes.
+
+When GitHub next deprecates a runtime, check `using:` on the action rather than
+trusting the release title — that is the field the runner actually reads.
 
 ## Costs
 

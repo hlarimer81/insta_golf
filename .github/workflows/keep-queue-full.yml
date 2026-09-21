@@ -30,6 +30,14 @@ on:
         type: string
         default: "14"
 
+# Action versions: the lowest that run on Node 24, not the newest available.
+# Node 20 is deprecated on runners, which is the only reason to move; every
+# further major carries breaking changes this pipeline gains nothing from
+# (setup-node v5+ reworks automatic cache detection, v7 migrates to ESM).
+# checkout and setup-node reached Node 24 at v5, configure-aws-credentials at
+# v6 -- its v5 is still Node 20, so bumping it to v5 would have left the
+# warning in place.
+
 permissions:
   id-token: write    # required to assume the AWS role via OIDC
   contents: write    # the top-up commits newly generated scripts back
@@ -46,8 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -58,7 +66,7 @@ jobs:
       - name: Ensure Remotion's browser
         run: npx remotion browser ensure
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -110,14 +118,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
