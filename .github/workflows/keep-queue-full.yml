@@ -18,6 +18,17 @@ on:
         type: choice
         options: [topup, report, both]
         default: both
+      # Raising min above the number of posts already queued forces a real
+      # staging run, which is the only way to exercise the render path on a
+      # runner while the queue is healthy. The daily schedule ignores these.
+      min:
+        description: Top up when fewer than this many posts remain
+        type: string
+        default: "7"
+      target:
+        description: Stage back up to this many posts
+        type: string
+        default: "14"
 
 permissions:
   id-token: write    # required to assume the AWS role via OIDC
@@ -66,7 +77,12 @@ jobs:
           # Optional override: set this repo variable to licensed track URLs
           # to use those instead of the generated beds.
           BOGEY_AUDIO_TRACKS: ${{ vars.BOGEY_AUDIO_TRACKS }}
-        run: npm run ensure:queue -- --min 7 --target 14
+          # Via env, not interpolated into the command: a dispatch input is
+          # free text, and inlining it in a run: line is a shell injection.
+          # Empty on a schedule run, so the defaults below apply.
+          MIN: ${{ inputs.min }}
+          TARGET: ${{ inputs.target }}
+        run: npm run ensure:queue -- --min "${MIN:-7}" --target "${TARGET:-14}"
 
       # Generated scripts must land back in the repo: the generator dedupes
       # against scripts/, so losing them means it starts repeating itself.

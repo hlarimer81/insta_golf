@@ -159,9 +159,19 @@ took 61 views — the best of that week. The gamble cost nothing.
 **Remotion has never rendered on a GitHub runner.** Both jobs pass, but `topup`
 short-circuits while the queue is full, so the render path stays untested until
 the queue crosses below 7 on **2026-10-05**. The `npm run beds` step is on that
-same cold path. A manual `workflow_dispatch` with `job: topup` exercises both
-without sending a report email — worth doing before Oct 5 rather than finding
-out that morning.
+same cold path.
+
+A dispatch with `job: topup` alone does **not** close this. With 20 posts
+queued, `ensure-queue` is at or above its floor and exits before reaching a
+render. It still proves `npm ci`, the Remotion browser download, the beds step
+and OIDC role assumption on Ubuntu, which is worth having, but not the render.
+
+To force a real one, dispatch with `min` above the number already queued —
+`job: topup`, `min: 21`, `target: 22` stages two posts and runs the whole
+generate → dedupe → b-roll → render → enqueue path on the runner. Those two are
+real posts and stay in the queue, so the test costs nothing beyond the Actions
+minutes. Keep `job` off `both`, which also sends a report email. The daily
+schedule ignores `min`/`target` and stays at 7/14.
 
 **A failed post leaves a silent hole.** The poster marks an entry `failed` and
 moves on; `ensure-queue` reports failures but doesn't backfill the lost day. The
