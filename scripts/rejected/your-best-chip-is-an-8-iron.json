@@ -1,0 +1,30 @@
+{
+  "slug": "your-best-chip-is-an-8-iron",
+  "kind": "tip",
+  "hook": "Your best chip isn't a chip at all.",
+  "beats": [
+    "Just off the green you grab the lob wedge and flinch.",
+    "From a clean lie, putt it or bump an 8-iron.",
+    "Play it back, hands forward, putting stroke.",
+    "It hops once and rolls out like a putt.",
+    "Less loft, less to go wrong, more balls close."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#chipping",
+    "#shortgame",
+    "#bumpandrun",
+    "#aroundthegreen"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/back-nine.mp3"
+}

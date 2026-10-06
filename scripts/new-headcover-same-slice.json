@@ -1,0 +1,19 @@
+{
+  "slug": "new-headcover-same-slice",
+  "kind": "joke",
+  "hook": "You bought a leather headcover for the driver.",
+  "beats": [
+    "It's hand-stitched.",
+    "It smells like a saddle.",
+    "It cost more than the lesson you won't take."
+  ],
+  "punchline": "The ball still goes out of bounds, just in style.",
+  "hashtags": [
+    "#headcover",
+    "#driverproblems",
+    "#golfgear",
+    "#slice"
+  ],
+  "brollSrc": "broll/new-headcover-same-slice.png",
+  "audioSrc": "audio/fairway-morning.mp3"
+}

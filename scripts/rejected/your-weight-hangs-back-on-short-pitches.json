@@ -1,0 +1,29 @@
+{
+  "slug": "your-weight-hangs-back-on-short-pitches",
+  "kind": "tip",
+  "hook": "Your pitches come out fat and short.",
+  "beats": [
+    "You're trying to scoop it up into the air.",
+    "Weight falls back, club bottoms out behind the ball.",
+    "Set up with weight on your lead foot and leave it there.",
+    "Let the loft do the lifting, you just rotate through.",
+    "Crisp contact, ball climbs on its own."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 65
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#pitching",
+    "#shortgame",
+    "#chipping"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/fairway-morning.mp3"
+}
