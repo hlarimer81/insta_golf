@@ -105,9 +105,13 @@ You write scripts for TEXT-ON-SCREEN vertical Reels — no face, no voiceover, s
 carries the whole video. A script is:
 - hook: the 0-1 second opening line. This is 90% of whether the Reel works. Make it stop a thumb:
   a myth to bust, a bold claim, a "stop doing X", a number. Short. Punchy. No hashtags, no emoji.
-- beats: 3-5 sequential on-screen lines that pay off the hook. Each beat is ONE short line
-  (a phone screen's width), timed to a b-roll cut. Build: problem -> the real cause -> the fix ->
-  the payoff. Concrete and specific — real numbers, real body parts, real feel. No filler.
+  Favor contradicting advice every golfer has been told ("Stop trying to keep your head down.")
+  over describing a situation ("You read it perfect and still miss right.") — so far the first
+  kind has drawn far more views.
+- beats: EXACTLY 3 sequential on-screen lines that pay off the hook. Each beat is ONE short line,
+  10 words at most — it is on screen for about two seconds and the whole Reel runs ~10s. Build:
+  the real cause -> the fix -> the payoff. Concrete and specific — real numbers, real body parts,
+  real feel. No filler.
 - visuals: for each beat you may attach an animated diagram. The only diagram available is a
   weight-distribution bar: {type:"weight", lead:<% of weight on the lead foot>}. Add it ONLY to a
   beat that is specifically about weight on the lead foot / weight forward / ball position (e.g.
@@ -115,7 +119,8 @@ carries the whole video. A script is:
 
 Voice rules:
 - Talk like a caddie, not a coach. Plain words. Confident, a little dry, never smug.
-- No emoji, no hashtags, no "hey golfers", no calls to follow/like.
+- No emoji, no hashtags, no "hey golfers", no calls to follow/like/save — the closing card
+  already asks for the save, so a beat spent on it is a beat wasted.
 - Every tip must be actually correct and genuinely useful.
 - No two scripts should share a hook angle or a fix.`;
 
@@ -129,7 +134,7 @@ You write short golf JOKES as text on screen — no face, no voiceover, so the w
 A joke is:
 - hook: the SETUP. One line that any weekend golfer recognizes instantly. It should be funny-adjacent
   on its own, because it's also the top line of a meme image.
-- beats: 2-3 short lines that escalate the setup. Each is ONE short line. They build the situation —
+- beats: 1-2 short lines that escalate the setup. Each is ONE short line. They build the situation —
   they do NOT explain the joke and they do NOT give the punchline away.
 - punchline: the payoff. One line, as short as you can make it. It must land on its own directly
   after the setup, because the meme format shows ONLY setup + punchline. Put the funniest word last.
@@ -160,7 +165,7 @@ const schema = {
           hook: { type: "string", description: "the 0-1s opening line" },
           beats: {
             type: "array",
-            description: "3-5 short on-screen lines that pay off the hook",
+            description: "exactly 3 short on-screen lines (10 words max each) that pay off the hook",
             items: { type: "string" },
           },
           visuals: {
@@ -221,7 +226,7 @@ const jokeSchema = {
           hook: { type: "string", description: "the setup line (also the meme's top line)" },
           beats: {
             type: "array",
-            description: "2-3 short lines that escalate the setup without spoiling the punchline",
+            description: "1-2 short lines that escalate the setup without spoiling the punchline",
             items: { type: "string" },
           },
           punchline: {

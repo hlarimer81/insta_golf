@@ -11,7 +11,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { BRAND } from "./brand";
+import { BRAND, signoffFor } from "./brand";
 import type { ReelProps } from "./schema";
 
 /** http(s) URLs pass through; bare paths resolve from the public/ folder. */
@@ -348,7 +348,7 @@ export const BogeyReel: React.FC<ReelProps> = (props) => {
 
       {/* Sign-off */}
       <Sequence from={afterBeats + punchFrames} durationInFrames={signoffFrames}>
-        <TextCard text={signoff} fontSize={64} />
+        <TextCard text={signoffFor({ signoff, punchline })} fontSize={64} />
       </Sequence>
     </AbsoluteFill>
   );

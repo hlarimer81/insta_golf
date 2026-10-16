@@ -6,7 +6,7 @@ import { Carousel, carouselSlideCount } from "./Carousel";
 import { Meme } from "./Meme";
 import { MemeReel, memeReelFrames } from "./MemeReel";
 import { reelSchema, totalFrames, type ReelProps } from "./schema";
-import { BRAND, POST, VIDEO } from "./brand";
+import { POST, VIDEO } from "./brand";
 
 // A built-in example so Studio opens with something to look at.
 const EXAMPLE: ReelProps = {
@@ -21,7 +21,7 @@ const EXAMPLE: ReelProps = {
   ],
   visuals: [],
   punchline: null,
-  signoff: BRAND.signoff,
+  signoff: null,
   brollSrc: null,
   audioSrc: null,
   hookSeconds: VIDEO.hookSeconds,

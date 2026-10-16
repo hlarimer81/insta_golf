@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BRAND, VIDEO } from "./brand";
+import { VIDEO } from "./brand";
 
 /**
  * The shape of a single Reel "script". This is what the script generator
@@ -40,8 +40,8 @@ export const reelSchema = z.object({
   // line of a meme. null on tips.
   punchline: z.string().nullable().default(null),
 
-  // Sign-off frame. Defaults to the Bogey signature.
-  signoff: z.string().default(BRAND.signoff),
+  // Sign-off frame. null = the save/send CTA for the kind (see signoffFor).
+  signoff: z.string().nullable().default(null),
 
   // Optional background footage (path under assets/broll or a URL).
   // If omitted, renders on the solid brand green.

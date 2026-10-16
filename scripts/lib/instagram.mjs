@@ -97,7 +97,9 @@ export function buildCaption(reel) {
       topic,
       process.env.IG_HASHTAGS_HUMOR || "#golf #golfmemes #golfhumor #golflife #golfproblems",
     );
-    return [reel.hook, "", reel.punchline ?? "", "", hashtags]
+    // Asks for a tag, which is a comment, which is the signal this account has
+    // never once had. The end card asks for the send.
+    return [reel.hook, "", reel.punchline ?? "", "", "Tag the guy who does this.", "", hashtags]
       .join("\n")
       .replace(/\n{3,}/g, "\n\n");
   }
@@ -105,7 +107,7 @@ export function buildCaption(reel) {
     topic,
     process.env.IG_HASHTAGS || "#golf #golftips #golfswing #golflife #golftok",
   );
-  return [reel.hook, "", ...reel.beats, "", hashtags].join("\n");
+  return [reel.hook, "", ...reel.beats, "", "Save this for your next round.", "", hashtags].join("\n");
 }
 
 // Thin Graph API POST/GET pair bound to a token + version.

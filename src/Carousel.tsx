@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
-import { BRAND } from "./brand";
+import { BRAND, signoffFor } from "./brand";
 import type { ReelProps } from "./schema";
 
 /**
@@ -185,14 +185,14 @@ const CTA: React.FC<{ signoff: string; brollSrc?: string | null }> = ({ signoff,
   </Slide>
 );
 
-export const Carousel: React.FC<ReelProps> = ({ hook, beats, signoff, brollSrc }) => {
+export const Carousel: React.FC<ReelProps> = ({ hook, beats, signoff, punchline, brollSrc }) => {
   const frame = useCurrentFrame();
   const slides = [
     <Cover key="cover" hook={hook} brollSrc={brollSrc} />,
     ...beats.map((b, i) => (
       <Beat key={i} text={b} index={i} total={beats.length} brollSrc={brollSrc} />
     )),
-    <CTA key="cta" signoff={signoff} brollSrc={brollSrc} />,
+    <CTA key="cta" signoff={signoffFor({ signoff, punchline })} brollSrc={brollSrc} />,
   ];
   return slides[Math.min(frame, slides.length - 1)];
 };

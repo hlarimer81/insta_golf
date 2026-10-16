@@ -104,6 +104,35 @@ read growth off those snapshots, plus followers per 1k views — the number that
 says whether views are turning into an audience. Growth becomes readable a week
 after the first snapshot.
 
+## Format change: short Reels that ask for something (2026-10-17)
+
+About 80 posts had earned 5 followers, and Reels were stalling at 50–75 views,
+about the size of the small test audience Instagram first shows a Reel to. They
+were not getting past it because nothing told Instagram to push them further:
+saves, shares and comments were all at or near zero.
+
+- **Shorter.** Tips are now hook + exactly 3 beats at 2.2s, about 10s total
+  (were 3s cards, 5–6 beats, ~24s). Jokes have 1–2 beats. Watch-through is what
+  Reels rank on.
+- **An ask.** The end card is now "Save this for your next round." on tips and
+  "Send this to the guy who does this." on jokes. Captions carry the same ask,
+  and jokes ask for a tag, which is a comment.
+- **Hooks** lean toward contradicting common advice. The one data point:
+  "Stop trying to keep your head down." took 116 views against 9 for a
+  situation hook. That is one pair, a hunch to test, not a finding.
+
+Both changes went in together on purpose: at 5 followers the account needs a
+large improvement more than a clean attribution. **The 10 posts already queued
+(through Oct 26) are in the old format** until re-rendered (`npm run rerender`,
+plus `npm run recaption` for captions); new scripts are staged in the new
+format. Judge it in the reports from the second week of November.
+
+**The report now compares settled posts.** Views keep climbing for about a week
+after posting, so comparing the latest week with the one before always showed a
+decline. The Oct 16 report called that "a real decline" when the newest posts
+were hours old. Views are now compared between posts 7–13 and 14–20 days old;
+the latest week is reported only as "so far".
+
 ## Weekly report delivery
 
 The report was emailed through SES from hlarimer@gmail.com to itself, and **none

@@ -69,8 +69,16 @@ const curEnd = dayAgo(0);
 const prevStart = dayAgo(13);
 const prevEnd = dayAgo(7);
 
+// Views keep climbing for days after a post, so last week's posts always look
+// stronger than this week's. On Oct 16 that read as "views dropped a third"
+// when the newest posts were hours old. Views are judged on posts 7–13 days
+// old against 14–20 (both settled); the latest week is reported as "so far".
+const oldStart = dayAgo(20);
+const oldEnd = dayAgo(14);
+
 const thisWeek = rows.filter((r) => r.date >= curStart && r.date <= curEnd);
 const lastWeek = rows.filter((r) => r.date >= prevStart && r.date <= prevEnd);
+const weekBefore = rows.filter((r) => r.date >= oldStart && r.date <= oldEnd);
 
 // The account posts once a day, so a fall in post count means days were missed
 // — a drained queue or a failed publish — not a change of schedule. Reporting
@@ -115,40 +123,41 @@ const gainedBetween = (a, b) =>
   gains.ok ? sum(gains.daily.filter((d) => d.date >= a && d.date <= b), "gained") : null;
 
 const pct = (a, b) => (b === 0 ? (a === 0 ? 0 : 100) : Math.round(((a - b) / b) * 100));
+const weekStats = (rs, a, b) => ({
+  window: `${a} to ${b}`,
+  posts: rs.length,
+  views: sum(rs, "views"),
+  avgViews: +avg(rs, "views").toFixed(1),
+  likes: sum(rs, "likes"),
+  comments: sum(rs, "comments"),
+  saves: sum(rs, "saved"),
+  shares: sum(rs, "shares"),
+  ...cadenceOf(rs, a, b),
+  // Followers gained over the same dates the posts went out.
+  followerNet: netChange(followerHistory, a, b)?.change ?? null,
+  newFollows: gainedBetween(a, b),
+});
+const counted = weekStats(lastWeek, prevStart, prevEnd);
+const countedPrior = weekStats(weekBefore, oldStart, oldEnd);
 const facts = {
-  window: `${curStart} to ${curEnd}`,
-  priorWindow: `${prevStart} to ${prevEnd}`,
-  thisWeek: {
-    posts: thisWeek.length,
-    views: sum(thisWeek, "views"),
-    avgViews: +avg(thisWeek, "views").toFixed(1),
-    likes: sum(thisWeek, "likes"),
-    comments: sum(thisWeek, "comments"),
-    saves: sum(thisWeek, "saved"),
-    shares: sum(thisWeek, "shares"),
-    ...cadenceOf(thisWeek, curStart, curEnd),
-  },
-  priorWeek: {
-    posts: lastWeek.length,
-    views: sum(lastWeek, "views"),
-    avgViews: +avg(lastWeek, "views").toFixed(1),
-    ...cadenceOf(lastWeek, prevStart, prevEnd),
-  },
-  changeInAvgViewsPct: pct(avg(thisWeek, "views"), avg(lastWeek, "views")),
-  best: thisWeek.length
-    ? thisWeek.reduce((a, b) => ((b.views ?? 0) > (a.views ?? 0) ? b : a))
+  // Settled posts: the only fair week-over-week view comparison.
+  counted,
+  countedPrior,
+  changeInAvgViewsPct: pct(counted.avgViews, countedPrior.avgViews),
+  best: lastWeek.length
+    ? lastWeek.reduce((a, b) => ((b.views ?? 0) > (a.views ?? 0) ? b : a))
     : null,
-  worst: thisWeek.length
-    ? thisWeek.reduce((a, b) => ((b.views ?? 0) < (a.views ?? 0) ? b : a))
+  worst: lastWeek.length
+    ? lastWeek.reduce((a, b) => ((b.views ?? 0) < (a.views ?? 0) ? b : a))
     : null,
-  perPost: thisWeek.map((r) => ({ date: r.date, slug: r.slug, views: r.views, likes: r.likes })),
+  perPost: lastWeek.map((r) => ({ date: r.date, slug: r.slug, views: r.views, likes: r.likes, saves: r.saved, shares: r.shares })),
+  // The latest week: cadence and follower news are current, views are not final.
+  fresh: {
+    ...weekStats(thisWeek, curStart, curEnd),
+    perPost: thisWeek.map((r) => ({ date: r.date, slug: r.slug, viewsSoFar: r.views })),
+  },
   followers: {
     now: account.ok ? account.followers : null,
-    // null = the snapshot history doesn't cover that window yet, not zero growth
-    netThisWeek: netChange(followerHistory, curStart, curEnd)?.change ?? null,
-    netPriorWeek: netChange(followerHistory, prevStart, prevEnd)?.change ?? null,
-    newFollowsThisWeek: gainedBetween(curStart, curEnd),
-    newFollowsPriorWeek: gainedBetween(prevStart, prevEnd),
     daysOfHistory: followerHistory.length,
   },
   queueRemaining: upcoming.length,
@@ -183,11 +192,20 @@ try {
       "the schedule is intact; only call cadence changed if that number moved. If the prior " +
       "window has silent days, say plainly that the comparison is against a partial week " +
       "instead of reporting the rise as growth. Never suggest cutting back to one post a " +
-      "day — that is already the schedule. The goal is followers: say whether this week's " +
-      "views turned into any. `followers.netThisWeek` is the net change in follower count; " +
-      "null means there isn't a week of daily snapshots yet, so say growth can't be read " +
-      "yet rather than calling it flat. `newFollowsThisWeek` is Instagram's own count where " +
-      "it exists. Plain prose, no headers, no bullet lists, under " +
+      "day — that is already the schedule. " +
+      "Views keep accumulating for about a week after a post. `counted` (posts 7–13 days " +
+      "old) and `countedPrior` (14–20 days old) have settled, so compare views only between " +
+      "those two. `fresh` is the last 7 days: its views are still climbing, so never compare " +
+      "it with anything, never call a fresh post weak for low views, and never read a " +
+      "within-week fade as a decline — the newest posts are always lowest. Use `fresh` only " +
+      "for cadence, follower and engagement news. " +
+      "Since 2026-10-17 new scripts are ~10s Reels (were ~24s) ending on a save/send call " +
+      "to action, with the same ask in captions; posts already queued then went out in the " +
+      "old format. Watch for saves, shares and comments moving off zero. " +
+      "The goal is followers: say whether views turned into any. `followerNet` is the net " +
+      "follower change over a window's dates and `newFollows` Instagram's own count where it " +
+      "exists; null means the daily snapshots don't reach back that far yet, so say growth " +
+      "can't be read yet rather than calling it flat. Plain prose, no headers, no bullet lists, under " +
       "200 words. Do not repeat the raw numbers back — they appear in a table beneath your " +
       "text.",
     messages: [{ role: "user", content: JSON.stringify(facts, null, 2) }],
@@ -204,10 +222,10 @@ if (facts.queueRemaining < 7)
   warn.push(`Queue is down to ${facts.queueRemaining} post(s) — through ${facts.queueThrough}.`);
 if (facts.failedEntries.length)
   warn.push(`Failed to publish: ${facts.failedEntries.join(", ")}.`);
-if (facts.thisWeek.silentDays.length)
+if (facts.fresh.silentDays.length)
   warn.push(
-    `${facts.thisWeek.silentDays.length} day(s) with no post: ` +
-      `${facts.thisWeek.silentDays.join(", ")}.`,
+    `${facts.fresh.silentDays.length} day(s) with no post: ` +
+      `${facts.fresh.silentDays.join(", ")}.`,
   );
 if (facts.tokenDataAccessDaysLeft != null && facts.tokenDataAccessDaysLeft < 21)
   warn.push(
@@ -217,96 +235,96 @@ if (facts.tokenDataAccessDaysLeft != null && facts.tokenDataAccessDaysLeft < 21)
 if (!account.ok) warn.push(`Couldn't read the follower count: ${account.error}.`);
 
 const esc = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]);
-const t = facts.thisWeek;
-const p = facts.priorWeek;
+const t = facts.counted;
+const p = facts.countedPrior;
+const f = facts.fresh;
 const fl = facts.followers;
 const arrow = facts.changeInAvgViewsPct > 0 ? "▲" : facts.changeInAvgViewsPct < 0 ? "▼" : "—";
-const priorNote = p.silentDays.length
-  ? `Prior week was partial — no post on ${p.silentDays.join(", ")}, so the post counts ` +
-    `are not like for like.`
-  : null;
 const signed = (n) => (n == null ? "—" : `${n >= 0 ? "+" : ""}${n}`);
 // Prefer the measured net change; Instagram's new-follows count stands in where
 // the snapshots don't reach back far enough yet.
-const gainOf = (net, gained) => (net != null ? net : gained);
+const gainOf = (w) => (w.followerNet != null ? w.followerNet : w.newFollows);
 const perK = (n, views) => (n == null || !views ? "—" : ((n / views) * 1000).toFixed(1));
-const thisGain = gainOf(fl.netThisWeek, fl.newFollowsThisWeek);
-const priorGain = gainOf(fl.netPriorWeek, fl.newFollowsPriorWeek);
-const followerNote =
-  thisGain == null
-    ? `Follower growth needs a week of daily snapshots — ${fl.daysOfHistory} recorded so far.`
-    : null;
+const md = (iso) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const span = (w) => w.window.split(" to ").map(md).join("–");
+const silentNote = (w) => (w.silentDays.length ? ` (${w.silentDays.length} silent)` : "");
 
+const notes = [
+  `Views compare posts from ${span(t)} with ${span(p)} — both old enough that their views have settled.`,
+  `Last 7 days (${span(f)}): ${f.posts} posts, ${f.views.toLocaleString()} views so far and still climbing; ` +
+    `${f.saves} saves, ${f.shares} shares, ${f.comments} comments.`,
+  ...(p.silentDays.length
+    ? [`${span(p)} was partial — no post on ${p.silentDays.join(", ")}, so post counts are not like for like.`]
+    : []),
+  ...(gainOf(f) == null
+    ? [`Follower growth needs a week of daily snapshots — ${fl.daysOfHistory} recorded so far.`]
+    : []),
+  ...(facts.best ? [`Best settled post: ${facts.best.slug} (${facts.best.views} views)`] : []),
+  ...(facts.worst && facts.worst.slug !== facts.best?.slug
+    ? [`Weakest: ${facts.worst.slug} (${facts.worst.views} views)`]
+    : []),
+  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}.`,
+];
+
+// [label, settled week, week before] — one table for the email and the issue.
+const table = [
+  ["Followers gained", signed(gainOf(t)), signed(gainOf(p))],
+  ["Followers / 1k views", perK(gainOf(t), t.views), perK(gainOf(p), p.views)],
+  ["Posts", `${t.posts}${silentNote(t)}`, `${p.posts}${silentNote(p)}`],
+  ["Views", t.views.toLocaleString(), p.views.toLocaleString()],
+  ["Avg / post", `${t.avgViews} ${arrow} ${Math.abs(facts.changeInAvgViewsPct)}%`, String(p.avgViews)],
+  ["Likes / comments", `${t.likes} / ${t.comments}`, `${p.likes} / ${p.comments}`],
+  ["Saves / shares", `${t.saves} / ${t.shares}`, `${p.saves} / ${p.shares}`],
+];
+const followersLine = `Followers: ${fl.now ?? "—"} (${signed(gainOf(f))} in the last 7 days)`;
+
+const td = (s, align = "right") => `<td align="${align}" style="padding:6px 12px">${esc(s)}</td>`;
 const html = `
 <div style="font:15px/1.55 -apple-system,Segoe UI,Helvetica,sans-serif;max-width:620px;color:#1a1a1a">
-  <h2 style="margin:0 0 4px">Bogey Golf — week of ${facts.window}</h2>
+  <h2 style="margin:0 0 4px">Bogey Golf — week to ${md(curEnd)}</h2>
+  <div style="font-size:17px;margin:4px 0 0"><b>${esc(followersLine)}</b></div>
   ${warn.length ? `<div style="background:#fff4e5;border-left:3px solid #d97706;padding:10px 12px;margin:14px 0">${warn.map((w) => `<div>⚠️ ${esc(w)}</div>`).join("")}</div>` : ""}
   <p style="white-space:pre-wrap">${esc(read)}</p>
   <table style="border-collapse:collapse;margin:18px 0;font-size:14px">
-    <tr style="background:#f4f4f5"><th align="left" style="padding:6px 12px">&nbsp;</th>
-      <th align="right" style="padding:6px 12px">This week</th><th align="right" style="padding:6px 12px">Prior</th></tr>
-    <tr><td style="padding:6px 12px">Followers</td><td align="right" style="padding:6px 12px"><b>${fl.now ?? "—"}</b> (${signed(thisGain)})</td><td align="right" style="padding:6px 12px">${signed(priorGain)}</td></tr>
-    <tr><td style="padding:6px 12px">Followers / 1k views</td><td align="right" style="padding:6px 12px">${perK(thisGain, t.views)}</td><td align="right" style="padding:6px 12px">${perK(priorGain, p.views)}</td></tr>
-    <tr><td style="padding:6px 12px">Posts</td><td align="right" style="padding:6px 12px">${t.posts}${t.silentDays.length ? ` <span style="color:#b45309">(${t.silentDays.length} silent day${t.silentDays.length > 1 ? "s" : ""})</span>` : ""}</td><td align="right" style="padding:6px 12px">${p.posts}${p.silentDays.length ? ` <span style="color:#b45309">(${p.silentDays.length} silent)</span>` : ""}</td></tr>
-    <tr><td style="padding:6px 12px">Views</td><td align="right" style="padding:6px 12px">${t.views.toLocaleString()}</td><td align="right" style="padding:6px 12px">${p.views.toLocaleString()}</td></tr>
-    <tr><td style="padding:6px 12px">Avg / post</td><td align="right" style="padding:6px 12px"><b>${t.avgViews}</b> ${arrow} ${Math.abs(facts.changeInAvgViewsPct)}%</td><td align="right" style="padding:6px 12px">${p.avgViews}</td></tr>
-    <tr><td style="padding:6px 12px">Likes / comments</td><td align="right" style="padding:6px 12px">${t.likes} / ${t.comments}</td><td align="right" style="padding:6px 12px">—</td></tr>
-    <tr><td style="padding:6px 12px">Saves / shares</td><td align="right" style="padding:6px 12px">${t.saves} / ${t.shares}</td><td align="right" style="padding:6px 12px">—</td></tr>
+    <tr style="background:#f4f4f5">${td("", "left")}${td(`Posted ${span(t)}`)}${td(span(p))}</tr>
+    ${table.map(([a, b, c]) => `<tr>${td(a, "left")}${td(b)}${td(c)}</tr>`).join("\n    ")}
   </table>
-  <div style="font-size:13px;color:#555">
-    ${facts.best ? `Best: <b>${esc(facts.best.slug)}</b> (${facts.best.views} views)<br>` : ""}
-    ${facts.worst && facts.worst.slug !== facts.best?.slug ? `Weakest: ${esc(facts.worst.slug)} (${facts.worst.views} views)<br>` : ""}
-    ${priorNote ? `${esc(priorNote)}<br>` : ""}
-    ${followerNote ? `${esc(followerNote)}<br>` : ""}
-    Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}.
-  </div>
+  <div style="font-size:13px;color:#555">${notes.map(esc).join("<br>")}</div>
 </div>`.trim();
 
 const text =
-  `Bogey Golf — week of ${facts.window}\n\n` +
+  `Bogey Golf — week to ${md(curEnd)}\n${followersLine}\n\n` +
   (warn.length ? warn.map((w) => `! ${w}`).join("\n") + "\n\n" : "") +
   `${read}\n\n` +
-  `Followers ${fl.now ?? "—"} (${signed(thisGain)} this week, ${signed(priorGain)} prior)\n` +
-  (followerNote ? `${followerNote}\n` : "") +
-  `Posts ${t.posts} (prior ${p.posts})\nViews ${t.views} (prior ${p.views})\n` +
-  (priorNote ? `${priorNote}\n` : "") +
-  `Avg/post ${t.avgViews} vs ${p.avgViews} (${facts.changeInAvgViewsPct >= 0 ? "+" : ""}${facts.changeInAvgViewsPct}%)\n` +
-  `Likes ${t.likes}, comments ${t.comments}, saves ${t.saves}, shares ${t.shares}\n` +
-  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}\n`;
+  `Posted ${span(t)} vs ${span(p)}:\n` +
+  table.map(([a, b, c]) => `${a}: ${b} (vs ${c})`).join("\n") +
+  `\n\n${notes.join("\n")}\n`;
 
 const subject =
-  `Bogey Golf: ${fl.now ?? "?"} followers (${signed(thisGain)}), ${t.views.toLocaleString()} views` +
+  `Bogey Golf: ${fl.now ?? "?"} followers (${signed(gainOf(f))}), ${t.avgViews} avg views/post` +
   (warn.length ? ` — ${warn.length} thing(s) need you` : "");
 
 // Markdown copy for the GitHub issue the workflow opens. That issue is the
 // delivery that actually lands: GitHub mails it from its own domain, whereas
 // SES sending "from" a gmail.com address looks spoofed to Gmail and
 // never reached the inbox. It also leaves every report readable in the repo.
-const mdRow = (a, b, c) => `| ${a} | ${b} | ${c} |`;
-const md = [
+const mdRow = (cells) => `| ${cells.join(" | ")} |`;
+const mdBody = [
+  `**${followersLine}**`,
+  "",
   ...(warn.length ? [warn.map((w) => `> ⚠️ ${w}`).join("\n>\n"), ""] : []),
   read,
   "",
-  mdRow("", "This week", "Prior"),
+  mdRow(["", `Posted ${span(t)}`, span(p)]),
   "|---|--:|--:|",
-  mdRow("Followers", `**${fl.now ?? "—"}** (${signed(thisGain)})`, signed(priorGain)),
-  mdRow("Followers / 1k views", perK(thisGain, t.views), perK(priorGain, p.views)),
-  mdRow("Posts", `${t.posts}${t.silentDays.length ? ` (${t.silentDays.length} silent)` : ""}`, `${p.posts}${p.silentDays.length ? ` (${p.silentDays.length} silent)` : ""}`),
-  mdRow("Views", t.views.toLocaleString(), p.views.toLocaleString()),
-  mdRow("Avg / post", `**${t.avgViews}** ${arrow} ${Math.abs(facts.changeInAvgViewsPct)}%`, p.avgViews),
-  mdRow("Likes / comments", `${t.likes} / ${t.comments}`, "—"),
-  mdRow("Saves / shares", `${t.saves} / ${t.shares}`, "—"),
+  ...table.map(mdRow),
   "",
-  ...(facts.best ? [`Best: **${facts.best.slug}** (${facts.best.views} views)  `] : []),
-  ...(facts.worst && facts.worst.slug !== facts.best?.slug ? [`Weakest: ${facts.worst.slug} (${facts.worst.views} views)  `] : []),
-  ...(priorNote ? [`${priorNote}  `] : []),
-  ...(followerNote ? [`${followerNote}  `] : []),
-  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}.`,
+  notes.join("  \n"),
 ].join("\n");
 
 const outDir = join(root, "out");
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "report.md"), md + "\n");
+writeFileSync(join(outDir, "report.md"), mdBody + "\n");
 writeFileSync(join(outDir, "report-subject.txt"), subject + "\n");
 
 if (dryRun) {
