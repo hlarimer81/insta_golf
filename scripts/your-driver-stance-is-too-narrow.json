@@ -1,0 +1,20 @@
+{
+  "slug": "your-driver-stance-is-too-narrow",
+  "kind": "tip",
+  "hook": "Your driver stance is costing you 15 yards.",
+  "beats": [
+    "Narrow feet give you nothing to turn against.",
+    "You slide instead of rotate and hit it thin.",
+    "Set your feet wider than your shoulders.",
+    "Now you can shift back, then fire through a solid base.",
+    "Wider stance, slower hips, longer drive."
+  ],
+  "hashtags": [
+    "#driving",
+    "#driver",
+    "#longdrive",
+    "#teeshot"
+  ],
+  "brollSrc": "broll/your-driver-stance-is-too-narrow.png",
+  "audioSrc": "audio/clubhouse.mp3"
+}

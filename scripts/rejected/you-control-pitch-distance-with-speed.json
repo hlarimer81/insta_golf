@@ -1,0 +1,29 @@
+{
+  "slug": "you-control-pitch-distance-with-speed",
+  "kind": "tip",
+  "hook": "You control pitch distance by swinging harder. Wrong.",
+  "beats": [
+    "Speed changes equal chunks, blades, and guesswork.",
+    "Keep the tempo the same every single time.",
+    "Let backswing length set the distance instead.",
+    "Hip-high back goes short, chest-high goes longer.",
+    "Set 60% on your lead foot and stay there."
+  ],
+  "visuals": [
+    null,
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    }
+  ],
+  "hashtags": [
+    "#chipping",
+    "#pitchshot",
+    "#shortgame",
+    "#wedgeplay"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/clubhouse.mp3"
+}

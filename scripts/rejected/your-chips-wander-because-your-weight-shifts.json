@@ -1,0 +1,29 @@
+{
+  "slug": "your-chips-wander-because-your-weight-shifts",
+  "kind": "tip",
+  "hook": "Your chips come out thin, then fat, then thin again.",
+  "beats": [
+    "The lie's fine. Your weight is the problem.",
+    "You rock back on your trail foot trying to lift it.",
+    "Set 60% on your lead foot and leave it there.",
+    "Now the club bottoms out past the ball every time.",
+    "Same strike, same distance, every chip."
+  ],
+  "visuals": [
+    null,
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#chipping",
+    "#shortgame",
+    "#wedgeplay"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/range-session.mp3"
+}
