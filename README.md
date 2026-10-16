@@ -238,7 +238,7 @@ and no local files are involved — just S3 + the Graph API.
 | Job | When | What it does |
 |---|---|---|
 | `topup` | daily, 06:00 UTC | If fewer than 7 posts remain queued, stages enough to reach 14 and commits the new scripts back |
-| `report` | Mondays, 14:00 UTC | Emails a week-over-week read of performance, written by Claude |
+| `report` | Mondays, 14:00 UTC | Opens a GitHub issue with a week-over-week read (followers, views), written by Claude |
 
 Both are also runnable by hand from the Actions tab (**Run workflow**).
 
@@ -250,7 +250,8 @@ You can check the same thing locally at any time:
 
 ```bash
 npm run ensure:queue -- --dry-run   # how much runway is left?
-npm run report -- --dry-run         # what would this week's email say?
+npm run report -- --dry-run         # what would this week's report say?
+npm run followers                   # record today's follower count, print the history
 ```
 
 ### One-time setup

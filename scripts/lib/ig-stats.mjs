@@ -87,3 +87,53 @@ export async function tokenHealth({ token, version }) {
 export const sum = (rows, k) => rows.reduce((n, r) => n + (typeof r[k] === "number" ? r[k] : 0), 0);
 /** Mean of a numeric field, 0 for an empty set. */
 export const avg = (rows, k) => (rows.length ? sum(rows, k) / rows.length : 0);
+
+/**
+ * The account itself — id, handle and follower count. A page token's `me` is
+ * the Facebook Page, which carries the linked IG account, so this needs no
+ * IG_USER_ID and works on CI where only the token is configured.
+ */
+export async function fetchAccount({ token, version, igUserId = process.env.IG_USER_ID }) {
+  const r = igUserId
+    ? await gget(token, version, igUserId, { fields: "id,username,followers_count,media_count" })
+    : await gget(token, version, "me", {
+        fields: "instagram_business_account{id,username,followers_count,media_count}",
+      });
+  if (!r.ok) return { ok: false, error: r.error?.message ?? "account lookup failed" };
+  const a = igUserId ? r.json : r.json.instagram_business_account;
+  if (!a) return { ok: false, error: "token's Page has no linked Instagram account" };
+  return {
+    ok: true,
+    id: a.id,
+    username: a.username,
+    followers: a.followers_count,
+    mediaCount: a.media_count,
+  };
+}
+
+/**
+ * New followers per day for up to the last 30 days, from account insights.
+ * Instagram only serves this to accounts with 100+ followers and only for 30
+ * days back, so a null here is normal for a small account — the daily snapshot
+ * in S3 (lib/followers.mjs) is the record that always exists.
+ */
+export async function fetchFollowerGains({ token, version, igUserId, days = 30 }) {
+  const until = Math.floor(Date.now() / 1000);
+  const since = until - Math.min(days, 30) * 86400;
+  const r = await gget(token, version, `${igUserId}/insights`, {
+    metric: "follower_count",
+    period: "day",
+    since: String(since),
+    until: String(until),
+  });
+  if (!r.ok) return { ok: false, error: r.error?.message ?? "follower_count refused" };
+  const values = r.json.data?.[0]?.values ?? [];
+  return {
+    ok: true,
+    // end_time is the close of the day being counted, so the day is the one before it.
+    daily: values.map((v) => ({
+      date: new Date(new Date(v.end_time).getTime() - 86400000).toISOString().slice(0, 10),
+      gained: v.value,
+    })),
+  };
+}

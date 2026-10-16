@@ -41,6 +41,7 @@ on:
 permissions:
   id-token: write    # required to assume the AWS role via OIDC
   contents: write    # the top-up commits newly generated scripts back
+  issues: write      # the weekly report is delivered as an issue
 
 env:
   AWS_REGION: us-east-1
@@ -70,6 +71,15 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
+
+      # Instagram keeps no follower history for an account this size, so the
+      # count is recorded daily or not at all. First, and allowed to fail: a
+      # Graph hiccup must not stop the queue being topped up.
+      - name: Record the follower count
+        continue-on-error: true
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: npm run followers
 
       # public/audio is git-ignored, so this runner starts with no beds. They
       # are generated rather than licensed, so regenerate them here the same
@@ -137,3 +147,16 @@ jobs:
           REPORT_FROM: ${{ vars.REPORT_FROM }}
           REPORT_TO: ${{ vars.REPORT_TO }}
         run: npm run report
+
+      # SES mail "from" a gmail.com address does not come from Google, so Gmail
+      # has every reason to bin it as spoofed -- and in two months not one report
+      # reached the inbox. An issue is mailed by GitHub itself, and the @mention
+      # makes that notification certain.
+      - name: Post the report as an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          { cat out/report.md; echo; echo "cc @$OWNER"; } > out/issue.md
+          cat out/report.md >> "$GITHUB_STEP_SUMMARY"
+          gh issue create --title "$(cat out/report-subject.txt)" --body-file out/issue.md

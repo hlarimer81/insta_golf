@@ -17,7 +17,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { makeS3, getJson } from "./lib/s3.mjs";
-import { fetchStats, tokenHealth, sum } from "./lib/ig-stats.mjs";
+import { fetchStats, tokenHealth, sum, fetchAccount, fetchFollowerGains } from "./lib/ig-stats.mjs";
+import { loadFollowerHistory, netChange } from "./lib/followers.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(join(root, ".env"))) {
@@ -94,6 +95,33 @@ const statics = rows.filter((r) => !r.isReel);
 if (reels.length && statics.length) {
   const per = (a) => (sum(a, "views") / a.length).toFixed(1);
   console.log(`Reels ${reels.length} avg ${per(reels)} — static ${statics.length} avg ${per(statics)}`);
+}
+
+// Followers — the number the views are supposed to turn into. Growth comes
+// from the daily snapshots (`npm run followers`); Instagram's own daily series
+// fills in when the account is big enough (100+) to be given one.
+const account = await fetchAccount({ token, version });
+if (account.ok) {
+  const history = await loadFollowerHistory(s3, bucket);
+  const today = new Date().toISOString().slice(0, 10);
+  console.log(`\nFollowers: ${num(account.followers)} (@${account.username})`);
+  for (const n of [7, 28]) {
+    const from = new Date(Date.now() - (n - 1) * 86400000).toISOString().slice(0, 10);
+    const net = netChange(history, from, today);
+    const views = sum(rows.filter((r) => r.date >= from), "views");
+    if (net)
+      console.log(
+        `   last ${n}d: ${net.change >= 0 ? "+" : ""}${net.change} on ${num(views)} views` +
+          (views ? ` (${((net.change / views) * 1000).toFixed(1)} per 1k views)` : ""),
+      );
+  }
+  if (history.length < 8)
+    console.log(`   ${history.length} day(s) of history so far — growth shows once a week has been recorded.`);
+  const gains = await fetchFollowerGains({ token, version, igUserId: account.id });
+  if (gains.ok && gains.daily.length)
+    console.log(`   Instagram's count of new follows, last ${gains.daily.length}d: ${sum(gains.daily, "gained")}`);
+} else {
+  console.log(`\n⚠️  Couldn't read the follower count: ${account.error}`);
 }
 
 // Data access lapses 60 days after authorization and takes insights with it.

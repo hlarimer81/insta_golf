@@ -1,6 +1,6 @@
 # insta-golf — status
 
-_Last updated: 2026-09-21_
+_Last updated: 2026-10-16_
 
 ## ⚠️ Action required: roll the Instagram credential
 
@@ -44,7 +44,7 @@ queue drained, resumed Sep 10 and has posted daily since.
 | Cadence | one post daily at 12:00 UTC (~8am ET) |
 | Failed entries | none |
 | Refill | automatic — tops up whenever fewer than 7 remain |
-| Report | emailed Mondays to hlarimer@gmail.com |
+| Report | Mondays, as a GitHub issue (GitHub emails it) |
 
 ## What the numbers said
 
@@ -80,8 +80,8 @@ nothing to push on.
 
 | Job | When | Does |
 |---|---|---|
-| `topup` | daily 06:00 UTC | generates beds, tops the queue back to 14 if under 7, commits new scripts |
-| `report` | Mondays 14:00 UTC | emails a week-over-week read written by Claude |
+| `topup` | daily 06:00 UTC | records the follower count, generates beds, tops the queue back to 14 if under 7, commits new scripts |
+| `report` | Mondays 14:00 UTC | opens an issue with a week-over-week read written by Claude |
 
 Daily and idempotent on purpose — a no-op six days in seven. A weekly refill
 would still have allowed a nine-day gap.
@@ -91,6 +91,28 @@ AWS access is OIDC role assumption; no keys stored in GitHub. The role
 denied on anything else.
 
 Locally: `npm run ensure:queue -- --dry-run` and `npm run report -- --dry-run`.
+
+## Followers
+
+**Added 2026-10-16. Nothing measured followers before this**, so there is no
+follower history before that date and none can be recovered: Instagram serves
+no history to accounts under 100 followers, and only 30 days above that.
+
+The top-up job snapshots the count daily into `followers.json` in the bucket
+(`npm run followers` does it by hand). `npm run stats` and the weekly report
+read growth off those snapshots, plus followers per 1k views — the number that
+says whether views are turning into an audience. Growth becomes readable a week
+after the first snapshot.
+
+## Weekly report delivery
+
+The report was emailed through SES from hlarimer@gmail.com to itself, and **none
+ever arrived**, though SES accepted every one. Mail claiming a gmail.com sender
+that did not come from Google is what Gmail discards as spoofed. Since
+2026-10-16 the report is opened as a GitHub issue that @mentions the owner, so
+GitHub sends the email. SES is still tried, best effort. A Claude failure now
+costs only the written read, not the whole report (on Oct 12 the API spend cap
+cost the whole thing).
 
 ## Captions and hashtags
 
