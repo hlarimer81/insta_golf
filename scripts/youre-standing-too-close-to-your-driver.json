@@ -1,0 +1,17 @@
+{
+  "slug": "youre-standing-too-close-to-your-driver",
+  "kind": "tip",
+  "hook": "You're standing too close to your driver.",
+  "beats": [
+    "Crowding the ball steepens your swing and slices it.",
+    "Let your arms hang; the grip just reaches you.",
+    "Now you've got room to swing around your body."
+  ],
+  "hashtags": [
+    "#driving",
+    "#driver",
+    "#teeshot"
+  ],
+  "brollSrc": "broll/youre-standing-too-close-to-your-driver.png",
+  "audioSrc": "audio/back-nine.mp3"
+}

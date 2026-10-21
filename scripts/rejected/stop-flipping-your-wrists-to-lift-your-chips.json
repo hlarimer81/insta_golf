@@ -1,0 +1,25 @@
+{
+  "slug": "stop-flipping-your-wrists-to-lift-your-chips",
+  "kind": "tip",
+  "hook": "Stop flipping your wrists to lift your chips.",
+  "beats": [
+    "Scooping leaves you fat one time, thin the next.",
+    "Press the handle forward, 65% on your lead foot.",
+    "Let the loft do the lifting. Crisp every time."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 65
+    },
+    null
+  ],
+  "hashtags": [
+    "#chipping",
+    "#shortgame",
+    "#wedgeplay"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/range-session.mp3"
+}

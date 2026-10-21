@@ -1,0 +1,25 @@
+{
+  "slug": "you-hang-back-on-your-chips",
+  "kind": "tip",
+  "hook": "You hang back on your chips to help them up.",
+  "beats": [
+    "Weight stuck on the back foot bottoms out early.",
+    "Set 60% on your lead foot, stay there.",
+    "Hit down, the loft lifts it for you."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null
+  ],
+  "hashtags": [
+    "#chipping",
+    "#shortgame",
+    "#chippingtips"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/fairway-morning.mp3"
+}
