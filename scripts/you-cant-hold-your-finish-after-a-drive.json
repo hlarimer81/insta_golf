@@ -1,0 +1,26 @@
+{
+  "slug": "you-cant-hold-your-finish-after-a-drive",
+  "kind": "tip",
+  "hook": "You can't hold your finish after a drive.",
+  "beats": [
+    "Falling off balance means you swung past your limit.",
+    "Dial it to 80% and finish on your lead side.",
+    "Balanced finish, straighter ball, same distance."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 90
+    },
+    null
+  ],
+  "hashtags": [
+    "#driving",
+    "#driver",
+    "#teeshot",
+    "#swingtempo"
+  ],
+  "brollSrc": "broll/you-cant-hold-your-finish-after-a-drive.png",
+  "audioSrc": "audio/fairway-morning.mp3"
+}

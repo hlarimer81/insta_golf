@@ -1,0 +1,26 @@
+{
+  "slug": "at-impact-your-weight-should-be-forward",
+  "kind": "tip",
+  "hook": "At impact, your weight should already be forward.",
+  "beats": [
+    "Hanging back makes you scoop and thin every iron.",
+    "Shift to 80% on your lead foot through the ball.",
+    "Divot after the ball, crisp contact every time."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 80
+    },
+    null
+  ],
+  "hashtags": [
+    "#ironplay",
+    "#ballstriking",
+    "#irons",
+    "#balltohurt"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/clubhouse.mp3"
+}

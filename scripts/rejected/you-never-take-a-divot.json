@@ -1,0 +1,26 @@
+{
+  "slug": "you-never-take-a-divot",
+  "kind": "tip",
+  "hook": "You never take a divot. That's why you thin it.",
+  "beats": [
+    "Scooping means the clubhead passes your hands.",
+    "Set 60% of your weight on your lead foot.",
+    "Ball first, then turf — flush every time."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null
+  ],
+  "hashtags": [
+    "#ironplay",
+    "#ballstriking",
+    "#divot",
+    "#contact"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/range-session.mp3"
+}
