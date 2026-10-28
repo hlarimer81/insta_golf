@@ -1,0 +1,26 @@
+{
+  "slug": "reverse-pivot-is-killing-your-drives",
+  "kind": "tip",
+  "hook": "A reverse pivot is killing your drives.",
+  "beats": [
+    "You lean toward the target going back and stall.",
+    "Load 60% into your trail foot at the top.",
+    "Now you've got something to push off."
+  ],
+  "visuals": [
+    null,
+    {
+      "type": "weight",
+      "lead": 40
+    },
+    null
+  ],
+  "hashtags": [
+    "#driving",
+    "#drivertips",
+    "#longdrive",
+    "#teeshot"
+  ],
+  "brollSrc": "broll/reverse-pivot-is-killing-your-drives.png",
+  "audioSrc": "audio/clubhouse.mp3"
+}

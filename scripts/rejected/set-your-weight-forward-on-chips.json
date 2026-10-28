@@ -1,0 +1,26 @@
+{
+  "slug": "set-your-weight-forward-on-chips",
+  "kind": "tip",
+  "hook": "Set your weight forward on chips and leave it there.",
+  "beats": [
+    "Put 70% on your lead foot at address.",
+    "Don't shift back trying to scoop it up.",
+    "Ball first, then turf, clean every time."
+  ],
+  "visuals": [
+    {
+      "type": "weight",
+      "lead": 70
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#chipping",
+    "#shortgame",
+    "#chipshot",
+    "#cleancontact"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/range-session.mp3"
+}
