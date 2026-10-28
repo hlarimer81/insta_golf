@@ -1,0 +1,32 @@
+{
+  "slug": "the-stuck-flagstick",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Pulling the pin like it owes me money.",
+  "beats": [
+    "Mulligan: I got the pin, I got it—",
+    "Birdie: It got you."
+  ],
+  "setting": "On the putting green gripping the flagstick with the hole right there in frame, full-body framing.",
+  "action": "Mulligan heaves on the flagstick with both hands, it suddenly pops free and sends him tumbling backward into a soft plop on the green as he speaks; Birdie watches, unimpressed.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I got the pin, I got it—"
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It got you."
+    }
+  ],
+  "sound": "a metal pop, a whoosh, a grassy plop, a giggle",
+  "seconds": 8,
+  "hashtags": [
+    "#flagstick",
+    "#puttinggreen",
+    "#tendingthepin"
+  ],
+  "score": 7,
+  "judge": "'It got you' is a crisp surprising reversal with good physical comedy.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

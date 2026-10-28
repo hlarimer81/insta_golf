@@ -1,0 +1,37 @@
+{
+  "slug": "the-foot-wedge",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The lie was terrible until his foot got involved.",
+  "beats": [
+    "Mulligan: Better lie now.",
+    "Birdie: You can't even walk.",
+    "Mulligan: I crawled it over."
+  ],
+  "setting": "In long rough grass off the fairway, thick blades up around the babies.",
+  "action": "Mulligan nudges his ball to a better spot with one foot, Birdie calls him out, Mulligan defends himself deadpan.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Better lie now."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You can't even walk."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "I crawled it over."
+    }
+  ],
+  "sound": "rustling rough grass, birdsong, a grunt of effort",
+  "seconds": 8,
+  "hashtags": [
+    "#footwedge",
+    "#intherough",
+    "#playitasitlies"
+  ],
+  "score": 8,
+  "judge": "'I crawled it over' cleverly uses babyhood with a sharp improvement twist.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

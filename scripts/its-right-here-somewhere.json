@@ -1,0 +1,32 @@
+{
+  "slug": "its-right-here-somewhere",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Spending four minutes finding a ball I never hit this far.",
+  "beats": [
+    "Mulligan: It's right here somewhere, I swear.",
+    "Birdie: It's in your hat."
+  ],
+  "setting": "Wading through tall, wispy rough grass up to their chests, trees just behind, full framing.",
+  "action": "Mulligan parts the long grass insisting the ball is near, then lifts his oversized bucket hat and the ball rolls right out of it onto the grass; Birdie stares as Mulligan freezes.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "It's right here somewhere, I swear."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It's in your hat."
+    }
+  ],
+  "sound": "rustling grass, a soft ball thud, a sheepish gurgle",
+  "seconds": 9,
+  "hashtags": [
+    "#lostball",
+    "#intherough",
+    "#buckethat"
+  ],
+  "score": 7,
+  "judge": "Ball in the hat reveal is a genuinely funny baby-specific surprise.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}
