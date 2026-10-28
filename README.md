@@ -63,6 +63,47 @@ npm run render:meme -- the-provisional-goes-straight
 
 Lands in `out/memes/<slug>.png` (1080×1350, 4:5).
 
+**Make a golf-babies Reel** (an AI video of two babies, Birdie and Mulligan,
+talking golf or doing something dumb on the course, with generated,
+lip-synced dialogue):
+
+```bash
+npm run babies                                     # 3 sketches, talk + slapstick mixed
+npm run babies -- --style slapstick "water hazards"
+npm run babies -- --style talk --count 5 "the first tee"
+npm run babies -- --pool 20                        # write 20, keep the best 3
+npm run review                                     # approve the ones you like (shows the judge's score)
+npm run render:babies -- <slug> --prompt-only      # see the video prompt, spend nothing
+npm run render:babies -- <slug>                    # generate out/<slug>.mp4
+npm run enqueue -- <slug> --at 2026-11-03T12:00    # queues like any Reel
+```
+
+Claude writes a pool of sketches (12 by default), a second Claude call scores
+each 1–10 as a harsh golf-comedy editor, and only the best `--count` become
+drafts; in a mix, the best talk and best slapstick sketch are always kept so
+the physical gags don't lose out to dialogue. Each sketch is a setting, action
+and 2–4 short lines of dialogue; the
+babies' looks are fixed in `scripts/lib/babies.mjs` so every clip describes them
+the same way. The video comes from fal.ai, using the same `FAL_KEY` as the
+backgrounds, on `bytedance/seedance-2.0/text-to-video` by default (6–12s,
+vertical, with audio). Set `FAL_VIDEO_MODEL` to swap models. It takes a few
+minutes per clip and **costs real money for each one, far more than an image**,
+so check [fal.ai/pricing](https://fal.ai/pricing) first. If a run is
+interrupted, re-running resumes the same request rather than paying twice, and
+an existing video is never regenerated without `--force`.
+
+**Watch every clip before you queue it.** Video models get hands, faces and
+physics wrong, and a bad take is just `--force` away. Captions say
+"AI-generated video", since Meta expects photorealistic AI video to be
+disclosed. `npm run render`, `rerender` and `refresh:bg` all skip babies
+sketches, so they can't overwrite a generated clip with a text Reel.
+They run on autopilot in their own lane: `npm run stage:babies -- --count N`
+writes, renders and queues N of them at 20:00 UTC (the 21:00 poster firing),
+alternating talk and slapstick, and the daily `babies` job in
+`keep-queue-full.yml` keeps that lane at 7–14 days. There is no review gate on
+that path; review happens on Instagram. `stage:week` and the main top-up
+ignore the babies lane.
+
 **Add an AI background** (fal.ai Flux → animated Ken-Burns b-roll behind the
 text):
 

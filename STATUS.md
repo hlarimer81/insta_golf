@@ -1,6 +1,6 @@
 # insta-golf — status
 
-_Last updated: 2026-10-16_
+_Last updated: 2026-10-28_
 
 ## ⚠️ Action required: roll the Instagram credential
 
@@ -132,6 +132,33 @@ after posting, so comparing the latest week with the one before always showed a
 decline. The Oct 16 report called that "a real decline" when the newest posts
 were hours old. Views are now compared between posts 7–13 and 14–20 days old;
 the latest week is reported only as "so far".
+
+## Golf babies: a second, afternoon post (2026-10-28)
+
+AI video Reels of two babies, Birdie and Mulligan, doing golf comedy — one a
+day, due 20:00 UTC and posted by the 21:00 firing (4–5pm Eastern), alongside
+the morning tip. Styles alternate: slapstick (a fall, the hat over the eyes,
+then a one-word tag) and talk (a golf-guy brag undercut by being a baby).
+
+- **Own lane.** Queue entries carry `lane: "babies"`. The main top-up,
+  `stage:week` and the report's queue-depth warning all ignore it; the
+  `babies` job tops it up to 14 when under 7, on the same 06:00 run.
+- **No review gate.** Claude writes 12 sketches per style, a second call judges
+  them, the best go straight to fal.ai (Seedance 2.0, 720p) and the queue. The
+  owner reviews them on Instagram and tunes the prompts in `scripts/babies.mjs`.
+- **Cost: ~$0.30 per second of video, ~$2.70 a clip, ~$80 a month.** By far
+  the most expensive thing this project runs. A failed render is skipped, not
+  retried, and turns the job red.
+- **This goes against the August finding** that a second daily post split
+  reach rather than adding to it. That was two of the same format; this is a
+  different one, by the owner's choice. Watch whether the morning posts lose
+  views once it starts.
+- **A missed 13:00 firing now shifts both lanes by one slot.** The 21:00
+  firing used to be a spare; now it has its own post. Miss a morning and the
+  poster (one post per firing, oldest first) runs one slot behind until a
+  firing finds nothing due — which, at two posts a day and two firings, is
+  never. Raising `MAX_POSTS_PER_RUN` to 2 would fix it, at the cost of a
+  redeploy.
 
 ## Weekly report delivery
 

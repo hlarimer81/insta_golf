@@ -23,6 +23,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { makeS3, getJson } from "./lib/s3.mjs";
 import { fetchStats, tokenHealth, sum, avg, fetchAccount, fetchFollowerGains } from "./lib/ig-stats.mjs";
 import { loadFollowerHistory, recordFollowers, netChange } from "./lib/followers.mjs";
+import { inBabiesLane } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(join(root, ".env"))) {
@@ -100,9 +101,13 @@ const cadenceOf = (rs, a, b) => {
 };
 
 const now = Date.now();
-const upcoming = queue.entries
+const pendingAhead = queue.entries
   .filter((e) => e.status === "pending" && new Date(e.publishAt).getTime() > now)
   .sort((a, b) => a.publishAt.localeCompare(b.publishAt));
+// The babies lane is a second, afternoon post; the depth warning is about the
+// main one, so the two are counted apart.
+const upcoming = pendingAhead.filter((e) => !inBabiesLane(e));
+const babiesUpcoming = pendingAhead.filter(inBabiesLane);
 const failed = queue.entries.filter((e) => e.status === "failed");
 const health = await tokenHealth({ token, version });
 
@@ -162,6 +167,7 @@ const facts = {
   },
   queueRemaining: upcoming.length,
   queueThrough: upcoming.length ? upcoming[upcoming.length - 1].publishAt.slice(0, 10) : null,
+  babiesQueueRemaining: babiesUpcoming.length,
   failedEntries: failed.map((e) => e.slug),
   tokenDataAccessDaysLeft: health.dataAccessExpiresInDays,
   tokenDataAccessExpiresOn: health.dataAccessExpiresOn,
@@ -263,7 +269,7 @@ const notes = [
   ...(facts.worst && facts.worst.slug !== facts.best?.slug
     ? [`Weakest: ${facts.worst.slug} (${facts.worst.views} views)`]
     : []),
-  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}.`,
+  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}, plus ${facts.babiesQueueRemaining} babies Reel(s).`,
 ];
 
 // [label, settled week, week before] — one table for the email and the issue.

@@ -88,6 +88,11 @@ for (const entry of pending) {
     continue;
   }
   const reel = JSON.parse(readFileSync(scriptPath, "utf8"));
+  // A babies clip carries its own generated audio and isn't a Remotion render.
+  if (reel.kind === "babies") {
+    console.log(`↷  ${entry.slug.padEnd(44)} babies clip, has its own audio`);
+    continue;
+  }
   const track = pickTrack(entry.slug, tracks);
   // Already scored with this bed: skip, so an interrupted run resumes instead
   // of re-rendering from the top. Forty minutes of work should be restartable.

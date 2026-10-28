@@ -1,0 +1,36 @@
+{
+  "slug": "brand-new-ball-gone",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Opened a fresh sleeve just to donate it to the woods.",
+  "beats": [
+    "Birdie: Fresh ball. First one out of the sleeve.",
+    "Mulligan: Water's up there on the left.",
+    "Birdie: It knows. They always know."
+  ],
+  "setting": "Two babies stand on a tee box, grass behind them, framed waist-up in a single shot.",
+  "action": "Birdie holds up a shiny new ball proudly and speaks, then Mulligan replies with his bucket hat slipping over his eyes, and Birdie gives a slow deadpan stare on the last line.",
+  "dialogue": [
+    {
+      "speaker": "Birdie",
+      "line": "Fresh ball. First one out of the sleeve."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Water's up there on the left."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It knows. They always know."
+    }
+  ],
+  "sound": "birdsong, a distant breeze, a tiny sigh",
+  "seconds": 9,
+  "hashtags": [
+    "#newball",
+    "#watchagolfball",
+    "#teebox",
+    "#weekendgolf"
+  ],
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

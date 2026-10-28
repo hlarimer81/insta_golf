@@ -45,6 +45,11 @@ let done = 0;
 for (const e of pending) {
   const type = e.type ?? "reel";
   const script = JSON.parse(readFileSync(join(scriptsDir, `${e.slug}.json`), "utf8"));
+  // A babies clip is a whole AI video, with no background to put behind it.
+  if (script.kind === "babies") {
+    console.log(`↷  skip    ${e.slug} (babies clip)`);
+    continue;
+  }
   try {
     // 1. Background (skip the fal call if one is already set + present).
     const haveBg = script.brollSrc && existsSync(join(root, "public", script.brollSrc));

@@ -33,6 +33,13 @@ for (const file of files) {
   const slug = script.slug ?? "bogey-reel";
   const outFile = join(root, "out", `${slug}.mp4`);
 
+  // A babies sketch's out/<slug>.mp4 is an AI video that cost money to make;
+  // rendering it as a text Reel would overwrite it.
+  if (script.kind === "babies") {
+    console.log(`\n↷  Skipping "${slug}" — a babies sketch. Use: npm run render:babies -- ${slug}`);
+    continue;
+  }
+
   console.log(`\n🎬  Rendering "${slug}"  →  out/${slug}.mp4`);
   const res = spawnSync(
     "npx",

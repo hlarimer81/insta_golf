@@ -40,6 +40,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { makeS3, getJson } from "./lib/s3.mjs";
 import { loadCorpus, judgeDuplicates } from "./lib/dedupe.mjs";
+import { inBabiesLane } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -199,7 +200,9 @@ let start;
 if (startArg) {
   start = new Date(`${startArg}T00:00:00Z`);
 } else {
-  const maxIso = queueNow.entries.reduce((m, e) => (e.publishAt > m ? e.publishAt : m), "");
+  // The babies lane runs its own afternoon calendar; appending after it would
+  // leave holes in this one.
+  const maxIso = queueNow.entries.filter((e) => !inBabiesLane(e)).reduce((m, e) => (e.publishAt > m ? e.publishAt : m), "");
   const base = maxIso ? new Date(maxIso) : new Date();
   start = new Date(base.getTime() + 86400000); // day after the last post
   // If the queue has been drained for a while, that day is in the past and

@@ -16,7 +16,7 @@ on:
       job:
         description: Which job to run
         type: choice
-        options: [topup, report, both]
+        options: [topup, babies, report, both]
         default: both
       # Raising min above the number of posts already queued forces a real
       # staging run, which is the only way to exercise the render path on a
@@ -119,6 +119,57 @@ jobs:
 
           Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
           # Nobody is watching this run, so don't fail on a repo that moved.
+          git pull --rebase origin main
+          git push
+
+  # The golf-babies lane: a second, afternoon post (20:00 UTC, picked up by the
+  # 21:00 poster firing). Its own job because each clip is minutes of fal.ai
+  # video generation, and a slow or failed render must not hold up the main
+  # top-up. Same 7/14 floor and target, counted on its own lane.
+  babies:
+    name: Top up the babies queue
+    if: github.event.schedule == '0 6 * * *' || inputs.job == 'babies'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Top up if the babies queue is below a week
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          MIN: ${{ inputs.min }}
+          TARGET: ${{ inputs.target }}
+        run: npm run ensure:queue -- --lane babies --min "${MIN:-7}" --target "${TARGET:-14}"
+
+      # Commit even when a render failed: the sketches that did render are
+      # already queued, and the generator needs them in scripts/ to avoid
+      # writing the same premise again.
+      - name: Commit any new scripts
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -z "$(git status --porcelain scripts/)" ]; then
+            echo "No new scripts — babies queue was already stocked."
+            exit 0
+          fi
+          git config user.name "insta-golf bot"
+          git config user.email "actions@github.com"
+          git add scripts/
+          git commit -m "Top up the babies queue
+
+          Staged automatically because the babies queue fell below 7 posts.
+
+          Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
           git pull --rebase origin main
           git push
 

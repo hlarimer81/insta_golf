@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { makeS3, uploadFile, getJson, putJson } from "./lib/s3.mjs";
 import { buildCaption } from "./lib/instagram.mjs";
+import { BABIES_LANE } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -159,6 +160,8 @@ async function cmdAdd(args) {
     mediaId: null,
     postedAt: null,
     error: null,
+    // Babies run in their own lane; the style lets the next top-up alternate.
+    ...(reel.kind === "babies" ? { lane: BABIES_LANE, style: reel.style } : {}),
   };
 
   if (isCarousel) {

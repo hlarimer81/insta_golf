@@ -1,0 +1,31 @@
+{
+  "slug": "ball-washer-plunge",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The ball washer has beaten better men than me.",
+  "beats": [
+    "Mulligan: Watch this, it's spotless now.",
+    "Birdie: You fell for a bucket of soap."
+  ],
+  "setting": "Beside a tee-box ball washer, both babies in frame, camera locked off at baby height.",
+  "action": "Mulligan cranks the ball washer handle too hard, leans way in to grab the ball, and plops sideway onto the soft grass as the hat flops over his face; Birdie turns and blinks flatly.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Watch this, it's spotless now."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You fell for a bucket of soap."
+    }
+  ],
+  "sound": "a squeaky crank, a soft plop, a giggle, birdsong",
+  "seconds": 8,
+  "hashtags": [
+    "#ballwasher",
+    "#teeboxfails",
+    "#cleangrips",
+    "#weekendgolf"
+  ],
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

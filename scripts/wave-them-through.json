@@ -1,0 +1,36 @@
+{
+  "slug": "wave-them-through",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The group behind us has been one shot back for an hour.",
+  "beats": [
+    "Birdie: The group behind is staring at us again.",
+    "Mulligan: Let 'em stare. We're due a good hole.",
+    "Birdie: We've been due since the second tee."
+  ],
+  "setting": "Two babies sit in a parked golf cart, both visible, single steady shot from the front.",
+  "action": "Birdie glances back over her shoulder nervously and speaks, Mulligan shrugs defiantly, then Birdie delivers the last line as Mulligan's hat drops over his eyes.",
+  "dialogue": [
+    {
+      "speaker": "Birdie",
+      "line": "The group behind is staring at us again."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Let 'em stare. We're due a good hole."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "We've been due since the second tee."
+    }
+  ],
+  "sound": "an idling cart hum, distant birds, an impatient off-screen horn",
+  "seconds": 10,
+  "hashtags": [
+    "#slowplay",
+    "#playthrough",
+    "#golfcart",
+    "#weekendgolf"
+  ],
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

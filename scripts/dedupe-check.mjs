@@ -144,7 +144,8 @@ mkdirSync(rejectedDir, { recursive: true });
 const slots = { tip: [], joke: [] };
 for (const v of toReplace) {
   const script = corpus.find((c) => c.slug === v.slug);
-  const kind = script?.kind === "joke" ? "joke" : "tip";
+  // A babies sketch is humor too; its slot goes back to a (text) joke.
+  const kind = script?.kind === "joke" || script?.kind === "babies" ? "joke" : "tip";
   const entry = pending.find((e) => e.slug === v.slug);
   if (!entry) {
     console.log(`  (${v.slug} isn't queued — filing it away only)`);

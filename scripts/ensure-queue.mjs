@@ -20,6 +20,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { makeS3, getJson } from "./lib/s3.mjs";
+import { inBabiesLane } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(join(root, ".env"))) {
@@ -45,6 +46,8 @@ const min = parseInt(opt("min", "7"), 10);
 const target = parseInt(opt("target", "14"), 10);
 const dryRun = argv.includes("--dry-run");
 const topic = opt("topic", null);
+// --lane babies tops up the afternoon golf-babies slot instead of the main post.
+const babies = opt("lane", "main") === "babies";
 
 if (min > target) {
   console.error(`--min (${min}) can't exceed --target (${target}).`);
@@ -59,15 +62,16 @@ const queue = (await getJson(s3, {
 
 const now = Date.now();
 const upcoming = queue.entries
+  .filter((e) => inBabiesLane(e) === babies)
   .filter((e) => e.status === "pending" && new Date(e.publishAt).getTime() > now)
   .sort((a, b) => a.publishAt.localeCompare(b.publishAt));
 
 const lastDay = upcoming.length ? upcoming[upcoming.length - 1].publishAt.slice(0, 10) : "—";
-console.log(`Queue: ${upcoming.length} post(s) scheduled ahead, through ${lastDay}.`);
+console.log(`${babies ? "Babies queue" : "Queue"}: ${upcoming.length} post(s) scheduled ahead, through ${lastDay}.`);
 
 // A post that failed to publish is invisible to the count above but is a real
 // hole in the calendar, so surface it rather than silently backfilling past it.
-const failed = queue.entries.filter((e) => e.status === "failed");
+const failed = queue.entries.filter((e) => inBabiesLane(e) === babies && e.status === "failed");
 if (failed.length) {
   console.log(`⚠️  ${failed.length} failed entr(ies): ${failed.map((e) => e.slug).join(", ")}`);
 }
@@ -78,6 +82,23 @@ if (upcoming.length >= min) {
 }
 
 const shortfall = target - upcoming.length;
+
+if (babies) {
+  console.log(`Below the floor of ${min} — staging ${shortfall} babies Reel(s).`);
+  if (dryRun) {
+    console.log("--dry-run: stopping before staging.");
+    process.exit(0);
+  }
+  const res = spawnSync("node", ["scripts/stage-babies.mjs", "--count", String(shortfall)], {
+    cwd: root,
+    stdio: "inherit",
+  });
+  if (res.status !== 0) {
+    console.error("✗ staging failed.");
+    process.exit(1);
+  }
+  process.exit(0);
+}
 // Roughly one joke a week; the data says jokes and tips draw the same views, so
 // this is for variety, not reach.
 const humor = Math.max(1, Math.round(shortfall / 7));

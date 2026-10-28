@@ -54,7 +54,7 @@ export function normalizeTags(value) {
  * ones carry a `hashtags` field written against the actual joke.
  */
 export function topicHashtags(reel) {
-  if (reel.kind === "joke") return [];
+  if (reel.kind === "joke" || reel.kind === "babies") return [];
   const text = [reel.slug, reel.hook, ...(reel.beats ?? []), reel.punchline ?? ""]
     .join(" ")
     .replace(/-/g, " ");
@@ -90,6 +90,18 @@ export function buildCaption(reel) {
 
   const topic = reel.hashtags?.length ? normalizeTags(reel.hashtags) : topicHashtags(reel);
 
+  if (reel.kind === "babies") {
+    // The dialogue is in the video, so the caption is the hook and the ask.
+    // Meta wants photorealistic AI video disclosed; saying so up front costs
+    // nothing and beats the post being labeled or limited for hiding it.
+    const hashtags = mergeTags(
+      topic,
+      process.env.IG_HASHTAGS_HUMOR || "#golf #golfmemes #golfhumor #golflife #golfproblems",
+    );
+    return [reel.hook, "", "Send this to your golf buddy.", "", "AI-generated video.", "", hashtags].join(
+      "\n",
+    );
+  }
   if (reel.kind === "joke") {
     // Jokes read as setup → punchline. The escalation beats are on-screen
     // timing, not caption copy, so they'd only spoil the pace here.

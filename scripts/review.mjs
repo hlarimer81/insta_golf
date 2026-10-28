@@ -80,7 +80,13 @@ for (let i = 0; i < drafts.length; i++) {
   console.log("─".repeat(60));
   console.log(`Draft ${i + 1}/${drafts.length}  (${file})\n`);
   console.log(`  HOOK   ${reel.hook}`);
-  for (const beat of reel.beats ?? []) console.log(`  BEAT   ${beat}`);
+  // A babies sketch is a video, so show what will be filmed, not just said.
+  if (reel.kind === "babies") {
+    console.log(`  SCENE  ${reel.setting}`);
+    console.log(`  ACTION ${reel.action}`);
+    if (reel.score != null) console.log(`  JUDGE  ${reel.score}/10 — ${reel.judge}`);
+  }
+  for (const beat of reel.beats ?? []) console.log(`  ${reel.kind === "babies" ? "SAYS " : "BEAT "}  ${beat}`);
   console.log("");
 
   let decided = false;
