@@ -1,0 +1,38 @@
+{
+  "slug": "push-cart-runaway",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "My push cart has a mind of its own on every slope.",
+  "beats": [
+    "Mulligan: I'll just park it right here.",
+    "Birdie: It's leaving without you.",
+    "Mulligan: ...Cardio."
+  ],
+  "setting": "On the fairway on a gentle slope, fairway and green rolling out behind.",
+  "action": "Mulligan lets go of a push cart that rolls away downhill on its own; he crawls after it as it tips over softly into the grass and his hat drops over his eyes.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I'll just park it right here."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It's leaving without you."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Cardio."
+    }
+  ],
+  "sound": "birdsong, wheels rattling, a soft tip-over, a frustrated squeal",
+  "seconds": 9,
+  "hashtags": [
+    "#pushcart",
+    "#fairway",
+    "#weekendgolf",
+    "#slowplay"
+  ],
+  "score": 6,
+  "judge": "Runaway cart with 'Cardio' is a light but real button.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

@@ -1,0 +1,38 @@
+{
+  "slug": "i-take-a-proper-divot",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "When your divot travels farther than the ball.",
+  "beats": [
+    "Mulligan: I take a proper divot.",
+    "Birdie: Ball's still there.",
+    "Mulligan: Divot's beautiful though."
+  ],
+  "setting": "On the fairway, open short grass behind, both babies looking down at a ball and a torn chunk of turf.",
+  "action": "Mulligan swings, a big clump of turf flies while the ball stays put, and he proudly holds up the divot as Birdie stares.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I take a proper divot."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Ball's still there."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Divot's beautiful though."
+    }
+  ],
+  "sound": "birdsong, a club thud, a chunk of turf flipping",
+  "seconds": 9,
+  "hashtags": [
+    "#divot",
+    "#chunked",
+    "#golfbaby",
+    "#fairway"
+  ],
+  "score": 7,
+  "judge": "'Divot's beautiful though' is a strong, deadpan last-line laugh.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

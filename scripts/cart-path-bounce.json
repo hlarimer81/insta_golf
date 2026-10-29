@@ -1,0 +1,38 @@
+{
+  "slug": "cart-path-bounce",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The one bounce off the cart path that saves my whole round.",
+  "beats": [
+    "Mulligan: I meant to do that.",
+    "Birdie: It's in the parking lot.",
+    "Mulligan: ...Rollout."
+  ],
+  "setting": "On the fairway beside a paved cart path, trees and fairway behind.",
+  "action": "Mulligan whacks a ball that smacks the cart path and rockets out of frame; he points after it proudly as his hat slides down.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I meant to do that."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It's in the parking lot."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Rollout."
+    }
+  ],
+  "sound": "birdsong, a crack off pavement, a whizzing ricochet, a smug coo",
+  "seconds": 9,
+  "hashtags": [
+    "#cartpath",
+    "#fairway",
+    "#rollout",
+    "#weekendgolf"
+  ],
+  "score": 6,
+  "judge": "Cart path rocket plus 'Rollout' has a nice cocky save.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

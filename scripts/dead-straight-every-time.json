@@ -1,0 +1,38 @@
+{
+  "slug": "dead-straight-every-time",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The shank that ends up in a completely different fairway.",
+  "beats": [
+    "Mulligan: Dead straight, every time.",
+    "Birdie: That's the other fairway.",
+    "Mulligan: Scenic route."
+  ],
+  "setting": "In the long rough off the fairway, tall grass around them, another fairway visible far to the side.",
+  "action": "Mulligan boasts he hits it dead straight, Birdie points to the wrong fairway in the distance, and Mulligan stays perfectly deadpan.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Dead straight, every time."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "That's the other fairway."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Scenic route."
+    }
+  ],
+  "sound": "wind in tall grass, birdsong, a flat pause",
+  "seconds": 8,
+  "hashtags": [
+    "#shank",
+    "#intherough",
+    "#golfbaby",
+    "#scenicroute"
+  ],
+  "score": 8,
+  "judge": "'Scenic route' is a genuinely funny, dry button on the wrong fairway.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

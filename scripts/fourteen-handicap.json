@@ -1,0 +1,38 @@
+{
+  "slug": "fourteen-handicap",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Everybody's handicap is a little creative.",
+  "beats": [
+    "Mulligan: I'm a fourteen handicap.",
+    "Birdie: You can't count to fourteen.",
+    "Mulligan: Exactly."
+  ],
+  "setting": "On the tee box with tee markers and the fairway stretching out behind the two babies.",
+  "action": "Mulligan stands proudly by the tee marker, Birdie gives a flat stare, and Mulligan beams.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I'm a fourteen handicap."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You can't count to fourteen."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Exactly."
+    }
+  ],
+  "sound": "birdsong, a breeze, a proud baby coo",
+  "seconds": 7,
+  "hashtags": [
+    "#handicap",
+    "#teebox",
+    "#golfbaby",
+    "#sandbagger"
+  ],
+  "score": 7,
+  "judge": "'You can't count to fourteen'/'Exactly' is a tight, surprising turn.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

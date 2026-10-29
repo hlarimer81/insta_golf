@@ -1,0 +1,38 @@
+{
+  "slug": "this-ones-going-300",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The big announcement right before the dribbler.",
+  "beats": [
+    "Mulligan: This one's going 300.",
+    "Birdie: Great. Three hundred.",
+    "Birdie: Inches."
+  ],
+  "setting": "On the tee box, tee markers beside them and the fairway opening up behind.",
+  "action": "Mulligan declares his drive, swings, and the ball dribbles two feet off the tee; Birdie peers down at it.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "This one's going 300."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Great. Three hundred."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Inches."
+    }
+  ],
+  "sound": "birdsong, a club whoosh, a soft dribble, a deadpan pause",
+  "seconds": 9,
+  "hashtags": [
+    "#teeshot",
+    "#topped",
+    "#golfbaby",
+    "#teebox"
+  ],
+  "score": 7,
+  "judge": "'Inches' as the kicker is a clean, quick surprise landing.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

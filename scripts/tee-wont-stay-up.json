@@ -1,0 +1,38 @@
+{
+  "slug": "tee-wont-stay-up",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Me re-teeing the ball for the ninth time while everyone waits.",
+  "beats": [
+    "Mulligan: This one's going three hundred.",
+    "Birdie: The ball won't even stay up.",
+    "Mulligan: ...Warm-up."
+  ],
+  "setting": "On a tee box with tee markers and the fairway stretching out behind them.",
+  "action": "Mulligan jabs a tee into the ground and the ball keeps rolling off; on his third try he announces his line, then the ball tips off again and he just stares.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "This one's going three hundred."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "The ball won't even stay up."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Warm-up."
+    }
+  ],
+  "sound": "birdsong, a tee tapping, a ball plopping off, a tiny sigh",
+  "seconds": 8,
+  "hashtags": [
+    "#teebox",
+    "#firsttee",
+    "#drivergolf",
+    "#weekendgolf"
+  ],
+  "score": 5,
+  "judge": "Ball won't stay up is relatable but 'Warm-up' is a soft button.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

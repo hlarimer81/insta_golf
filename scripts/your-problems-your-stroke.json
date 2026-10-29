@@ -1,0 +1,38 @@
+{
+  "slug": "your-problems-your-stroke",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The guy who gives you a putting tip he can't follow.",
+  "beats": [
+    "Mulligan: Your problem's your stroke.",
+    "Birdie: You putt with a pacifier.",
+    "Mulligan: Feel player."
+  ],
+  "setting": "Beside the putting green, flagstick and hole in frame, Mulligan seated in an oversized stroller.",
+  "action": "Mulligan dispenses unsolicited putting advice from his stroller, Birdie calls out the irony, Mulligan shrugs smugly.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Your problem's your stroke."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You putt with a pacifier."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Feel player."
+    }
+  ],
+  "sound": "birdsong, a flag flap, a stroller creak",
+  "seconds": 9,
+  "hashtags": [
+    "#swingtipguy",
+    "#puttinggreen",
+    "#golfbaby",
+    "#feelplayer"
+  ],
+  "score": 7,
+  "judge": "'You putt with a pacifier'/'Feel player' is a sharp, funny exchange.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

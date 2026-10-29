@@ -1,0 +1,38 @@
+{
+  "slug": "this-group-is-glacial",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Waiting on every single shot and losing your mind.",
+  "beats": [
+    "Mulligan: This group is glacial.",
+    "Birdie: You nap twice a day.",
+    "Mulligan: Different pace."
+  ],
+  "setting": "On the fairway, both babies standing with arms crossed, open grass and a stalled group visible far ahead.",
+  "action": "Mulligan taps his tiny foot impatiently and sighs at the group ahead, Birdie deadpans back at him.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "This group is glacial."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You nap twice a day."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Different pace."
+    }
+  ],
+  "sound": "birdsong, an impatient toddler sigh",
+  "seconds": 7,
+  "hashtags": [
+    "#slowplay",
+    "#paceofplay",
+    "#golfbaby",
+    "#weekendgolf"
+  ],
+  "score": 6,
+  "judge": "'You nap twice a day' is a decent baby-jab but the last line fizzles.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

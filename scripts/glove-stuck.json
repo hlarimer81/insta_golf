@@ -1,0 +1,38 @@
+{
+  "slug": "glove-stuck",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Wrestling a glove on before every single shot.",
+  "beats": [
+    "Mulligan: Can't swing without my glove.",
+    "Birdie: It's on the wrong hand.",
+    "Mulligan: ...Lefty."
+  ],
+  "setting": "On the fairway, short grass and a flag in the distance behind them.",
+  "action": "Mulligan tugs a tiny glove with his teeth and his whole arm, finally pulling his hat down over his face instead; Birdie stares.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Can't swing without my glove."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It's on the wrong hand."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Lefty."
+    }
+  ],
+  "sound": "birdsong, a Velcro rip, a muffled grunt, a giggle",
+  "seconds": 9,
+  "hashtags": [
+    "#golfglove",
+    "#fairway",
+    "#weekendgolf",
+    "#gear"
+  ],
+  "score": 6,
+  "judge": "Wrong-hand glove plus 'Lefty' is a tidy little turn.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

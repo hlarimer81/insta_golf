@@ -1,0 +1,38 @@
+{
+  "slug": "flagstick-tug-of-war",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Pulling the pin like it personally wronged me.",
+  "beats": [
+    "Mulligan: I got the pin, go ahead.",
+    "Birdie: You pulled yourself over.",
+    "Mulligan: ...Tended."
+  ],
+  "setting": "On a putting green, hole and flagstick front and center.",
+  "action": "Mulligan heaves on the flagstick with both hands, it finally pops free, and he topples backward into a soft plop with the pin across his lap.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I got the pin, go ahead."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You pulled yourself over."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Tended."
+    }
+  ],
+  "sound": "birdsong, a straining grunt, a pop, a soft plop, a giggle",
+  "seconds": 8,
+  "hashtags": [
+    "#flagstick",
+    "#puttinggreen",
+    "#pullthepin",
+    "#weekendgolf"
+  ],
+  "score": 6,
+  "judge": "Pulling himself over and calling it 'Tended' is a clever dodge.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}
