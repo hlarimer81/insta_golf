@@ -1,0 +1,25 @@
+{
+  "slug": "weight-forward-on-irons",
+  "kind": "tip",
+  "hook": "You scoop your irons trying to lift them.",
+  "beats": [
+    "Set 60% on your lead foot at address.",
+    "Keep it there and hit the ball first.",
+    "Crisp contact, and the loft does the lifting."
+  ],
+  "visuals": [
+    {
+      "type": "weight",
+      "lead": 60
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#ironplay",
+    "#ballstriking",
+    "#impactposition"
+  ],
+  "brollSrc": null,
+  "audioSrc": "audio/fairway-morning.mp3"
+}
