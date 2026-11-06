@@ -1,0 +1,38 @@
+{
+  "slug": "one-swing-im-out",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The bunker shot that stays in the bunker.",
+  "beats": [
+    "Mulligan: Watch me splash it right out.",
+    "Mulligan: Out?",
+    "Birdie: In."
+  ],
+  "setting": "Down in a greenside bunker, the raked sand lip and flagstick visible behind them.",
+  "action": "Mulligan promises an easy escape then swings, sand sprays and his hat drops over his eyes while the ball stays put; Birdie delivers the deadpan tag.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Watch me splash it right out."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Out?"
+    },
+    {
+      "speaker": "Birdie",
+      "line": "In."
+    }
+  ],
+  "sound": "a sand thump, flying grains, a hat flump",
+  "seconds": 8,
+  "hashtags": [
+    "#bunkershot",
+    "#sandtrap",
+    "#golfbaby",
+    "#shortgame"
+  ],
+  "score": 7,
+  "judge": "'Out?'/'In.' is a crisp two-word deadpan that pays off the slapstick.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "i-live-here-now",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The bunker shot that never escapes the bunker.",
+  "beats": [
+    "Mulligan: I live here now.",
+    "Birdie: Bring a bottle."
+  ],
+  "setting": "Down inside a greenside bunker, high sand lip behind, camera at sand level.",
+  "action": "Mulligan tries to crawl up the sand wall, the slope collapses and he slides back down into a soft sandy heap. Birdie peers over the lip from above.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I live here now."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Bring a bottle."
+    }
+  ],
+  "sound": "sliding sand, a soft flop, a giggle",
+  "seconds": 9,
+  "hashtags": [
+    "#bunker",
+    "#sandtrap",
+    "#buried",
+    "#greenside"
+  ],
+  "score": 6,
+  "judge": "'Bring a bottle' uses the baby angle with a fun surrender.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

@@ -1,0 +1,38 @@
+{
+  "slug": "lets-play-thirty-six",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "The guy who always wants to play another nine.",
+  "beats": [
+    "Mulligan: Round's flying. Let's play thirty-six.",
+    "Birdie: You get carried after nine.",
+    "Mulligan: ...Cart the back."
+  ],
+  "setting": "On the fairway mid-round, green and flagstick visible far behind them.",
+  "action": "Mulligan stretches ambitiously on the first line, Birdie reminds him of reality, and Mulligan negotiates the tag.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Round's flying. Let's play thirty-six."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You get carried after nine."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "...Cart the back."
+    }
+  ],
+  "sound": "a breeze, birdsong, a little grunt",
+  "seconds": 9,
+  "hashtags": [
+    "#thirtysix",
+    "#weekendgolf",
+    "#golfbaby",
+    "#backnine"
+  ],
+  "score": 7,
+  "judge": "'Cart the back' is a clever golf-term twist on getting carried after nine.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

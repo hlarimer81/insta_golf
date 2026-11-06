@@ -1,0 +1,38 @@
+{
+  "slug": "stroller-swing-tip",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Tag the buddy who fixes your swing from the cart.",
+  "beats": [
+    "Mulligan: Your takeaway's way too quick, pal.",
+    "Birdie: You can't even walk.",
+    "Mulligan: Visualize it."
+  ],
+  "setting": "On the fairway with the open hole stretching out behind, Mulligan parked in a stroller at the edge of the short grass.",
+  "action": "Mulligan lounges in his stroller dispensing wisdom as Birdie stands over the ball, Birdie fires back, and Mulligan waves it off.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Your takeaway's way too quick, pal."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You can't even walk."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Visualize it."
+    }
+  ],
+  "sound": "a stroller creak, a breeze, a confident coo",
+  "seconds": 10,
+  "hashtags": [
+    "#swingtips",
+    "#thatguy",
+    "#golfbaby",
+    "#fairway"
+  ],
+  "score": 7,
+  "judge": "'Visualize it' from a baby who can't walk is a sharp surprising button.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

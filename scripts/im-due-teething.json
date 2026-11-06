@@ -1,0 +1,38 @@
+{
+  "slug": "im-due-teething",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "I'm due. I've been due all day.",
+  "beats": [
+    "Mulligan: I'm due for a birdie. I can feel it.",
+    "Birdie: You're teething.",
+    "Mulligan: Feels the same."
+  ],
+  "setting": "On the tee box, tee markers beside them and the fairway opening up behind.",
+  "action": "Mulligan thumps his chest with conviction, Birdie cuts him down, and Mulligan gnaws his glove on the tag.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I'm due for a birdie. I can feel it."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You're teething."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Feels the same."
+    }
+  ],
+  "sound": "a breeze, a tiny gum-chomp, birdsong",
+  "seconds": 9,
+  "hashtags": [
+    "#imdue",
+    "#teething",
+    "#golfbaby",
+    "#teebox"
+  ],
+  "score": 8,
+  "judge": "'Feels the same' lands teething vs birdie perfectly with a surprising last line.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

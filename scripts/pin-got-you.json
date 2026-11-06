@@ -1,0 +1,33 @@
+{
+  "slug": "pin-got-you",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Pulling the pin like it owes me money.",
+  "beats": [
+    "Mulligan: I got the pin!",
+    "Birdie: Pin got you."
+  ],
+  "setting": "On the putting green with the hole and flagstick clearly in frame, camera low beside the cup.",
+  "action": "Mulligan grabs the flagstick and yanks with his whole body; it pops free and he topples backward into a soft plop on the green. Birdie leans over him.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I got the pin!"
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Pin got you."
+    }
+  ],
+  "sound": "a flagstick rattle, a soft plop, a giggle",
+  "seconds": 7,
+  "hashtags": [
+    "#pullthepin",
+    "#flagstick",
+    "#puttinggreen",
+    "#tendthepin"
+  ],
+  "score": 6,
+  "judge": "Clean pin reversal with a solid pratfall, but a familiar flip.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

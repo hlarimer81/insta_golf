@@ -1,0 +1,33 @@
+{
+  "slug": "bag-carries-you",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Hauling a bag bigger than you are.",
+  "beats": [
+    "Mulligan: I carry.",
+    "Birdie: Bag carries you."
+  ],
+  "setting": "On the fairway, short grass and open hole behind, camera facing both babies.",
+  "action": "Mulligan shoulders a towering golf bag, wobbles, then topples sideways and disappears under it. Birdie leans over the heap.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I carry."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Bag carries you."
+    }
+  ],
+  "sound": "clattering clubs, a soft thud, birdsong",
+  "seconds": 8,
+  "hashtags": [
+    "#carrybag",
+    "#walkingthecourse",
+    "#fairway",
+    "#loaded"
+  ],
+  "score": 5,
+  "judge": "Carry reversal is cute but very predictable.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

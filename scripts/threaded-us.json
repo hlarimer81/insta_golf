@@ -1,0 +1,33 @@
+{
+  "slug": "threaded-us",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The hero shot through the trees that comes right back.",
+  "beats": [
+    "Mulligan: Threading it.",
+    "Birdie: Threaded us."
+  ],
+  "setting": "Among the trees off the fairway, trunks and pine straw all around, camera facing both.",
+  "action": "Mulligan swings for a gap in the trees, the ball ricochets off a trunk straight back and both babies duck as it whizzes past. Birdie glares.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Threading it."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Threaded us."
+    }
+  ],
+  "sound": "a whoosh, a sharp tree knock, a ricochet zip",
+  "seconds": 8,
+  "hashtags": [
+    "#inthetrees",
+    "#heroshot",
+    "#punchout",
+    "#ricochet"
+  ],
+  "score": 6,
+  "judge": "'Threaded us' with the duck is a snappy ricochet beat.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}
