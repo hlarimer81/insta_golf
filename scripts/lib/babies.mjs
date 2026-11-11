@@ -31,6 +31,15 @@ export function videoPrompt(sketch) {
     "one continuous shot with no cuts.",
     `Two babies: Birdie, ${CAST.Birdie}; and Mulligan, ${CAST.Mulligan}.`,
     `Setting: ${sentence(sketch.setting)}`,
+    // Recurring video-model mistakes: greens floating at the babies' waist,
+    // two cups in one shot, and the tee peg stuck in the cup. Video models
+    // follow positive descriptions better than negations, so each rule says
+    // what is true and then rules out the mistake.
+    "Framing: full-body shot, the babies' feet and the grass they stand on always in frame.",
+    "Course layout: the grass is flat, level ground directly under the babies' feet; the",
+    "green, fairway and tee box are all at ground level, never raised to waist height.",
+    "At most one golf hole appears anywhere in the video, never two.",
+    "Golf tees are only ever pushed into the grass on the tee box, never in the hole.",
     `Action: ${sentence(sketch.action)}`,
     `Dialogue, spoken clearly in cute baby voices with accurate lip sync: ${lines}`,
     `Sound: ${sentence(sketch.sound)}`,

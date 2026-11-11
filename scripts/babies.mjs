@@ -125,6 +125,13 @@ recognizes where they are:
 - A bunker shot or a water hazard: in or beside the bunker, or at the pond's edge.
 - Any other shot (approach, layup, chip from short grass): on the fairway.
 Name the setting explicitly in the "setting" field, including what's visible behind the babies.
+Physical layout, which the video model gets wrong if the sketch is vague:
+- Frame the babies full-body: their feet and the grass under them are always in frame. Never
+  "waist-up" or a close-up that crops out the ground.
+- The babies stand on flat grass; the green is the ground under their feet, never a raised
+  surface at waist height.
+- At most one hole in the whole sketch. Never two cups or two flagsticks.
+- A golf tee only ever goes in the ground on the tee box, never in or next to the hole.
 
 Where the laugh comes from — every sketch uses at least one of these. Adult golf small talk in a
 baby's mouth is NOT enough on its own; the joke must collide golf-guy attitude with being a baby.
