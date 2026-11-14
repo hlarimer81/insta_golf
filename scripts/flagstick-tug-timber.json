@@ -1,0 +1,33 @@
+{
+  "slug": "flagstick-tug-timber",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Pulling the pin like it owes me money.",
+  "beats": [
+    "Birdie: I got the pin.",
+    "Mulligan: Pin got you."
+  ],
+  "setting": "On a putting green, both babies full-body beside the hole with the flagstick standing in the cup.",
+  "action": "Birdie grips the flagstick with both hands and yanks; it pops free and she tumbles backward onto the green, pin across her lap. Mulligan gives a slow nod.",
+  "dialogue": [
+    {
+      "speaker": "Birdie",
+      "line": "I got the pin."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Pin got you."
+    }
+  ],
+  "sound": "a grunt, a pop, a soft plop onto grass",
+  "seconds": 7,
+  "hashtags": [
+    "#pullthepin",
+    "#flagstick",
+    "#puttinggreen",
+    "#tendingflag"
+  ],
+  "score": 7,
+  "judge": "'Pin got you' reversal is snappy and surprising with the tumble.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

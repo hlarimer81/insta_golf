@@ -1,0 +1,38 @@
+{
+  "slug": "tee-wont-stay-ninth",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "Me re-teeing for the ninth time while everyone waits.",
+  "beats": [
+    "Mulligan: One second.",
+    "Mulligan: One more second.",
+    "Birdie: It's been nine."
+  ],
+  "setting": "On a tee box with tee markers and the open fairway behind, both babies full-body on the grass.",
+  "action": "Mulligan balances the ball on the tee and it rolls off; he sets it again and it tips off again as he speaks. He stares at it, hat sliding down.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "One second."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "One more second."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "It's been nine."
+    }
+  ],
+  "sound": "birdsong, a tiny ball tapping, an impatient sigh",
+  "seconds": 9,
+  "hashtags": [
+    "#slowplay",
+    "#teebox",
+    "#reteeing",
+    "#firsttee"
+  ],
+  "score": 7,
+  "judge": "'It's been nine' is a crisp, unexpected escalation on the ball-falling bit.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

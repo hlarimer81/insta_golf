@@ -1,0 +1,33 @@
+{
+  "slug": "sand-shower-bunker",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The bunker shot that buries you, not the ball.",
+  "beats": [
+    "Mulligan: Explosion shot.",
+    "Birdie: You exploded."
+  ],
+  "setting": "Standing in a greenside sand bunker with the lip and a flag just beyond, both babies full-body with sand under their feet.",
+  "action": "Mulligan takes a huge swing and launches a cloud of sand straight up that rains down and covers him completely; the ball never moves. Birdie blinks, coated in sand too.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "Explosion shot."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You exploded."
+    }
+  ],
+  "sound": "a whoosh, a sandy spray, a soft patter of falling sand",
+  "seconds": 8,
+  "hashtags": [
+    "#bunkershot",
+    "#sandsave",
+    "#beachday",
+    "#shortgame"
+  ],
+  "score": 6,
+  "judge": "Explosion wordplay lands cute but the reveal is telegraphed.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

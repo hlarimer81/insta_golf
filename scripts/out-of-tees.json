@@ -1,0 +1,38 @@
+{
+  "slug": "out-of-tees",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Where do all the tees even go?",
+  "beats": [
+    "Mulligan: I'm out of tees.",
+    "Birdie: You had twelve.",
+    "Mulligan: Teething."
+  ],
+  "setting": "Standing on a tee box, tee markers beside them and fairway stretching out behind, full-body framing with grass under their feet.",
+  "action": "Mulligan pats around empty-handed; Birdie asks, Mulligan reveals the babyhood reason.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "I'm out of tees."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You had twelve."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "Teething."
+    }
+  ],
+  "sound": "birdsong, a frustrated grumble, a tiny gum-smack",
+  "seconds": 7,
+  "hashtags": [
+    "#brokentee",
+    "#teething",
+    "#teebox",
+    "#golfbaby"
+  ],
+  "score": 7,
+  "judge": "'Teething' is a crisp one-word baby reveal that surprises.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

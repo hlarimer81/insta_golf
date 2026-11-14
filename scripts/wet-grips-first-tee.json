@@ -1,0 +1,43 @@
+{
+  "slug": "wet-grips-first-tee",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Nobody warns you about the 7am dew.",
+  "beats": [
+    "Mulligan: First tee, freezing out here.",
+    "Birdie: Grips are soaking wet.",
+    "Mulligan: That's morning dew.",
+    "Birdie: That's drool."
+  ],
+  "setting": "Standing full-body on a tee box at dawn, tee markers beside them and misty fairway stretching out behind, camera framing both babies and the grass at their feet.",
+  "action": "Birdie holds a dripping club and frowns while Mulligan's bucket hat slumps; they trade lines, ending on Birdie's deadpan.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "First tee, freezing out here."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Grips are soaking wet."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "That's morning dew."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "That's drool."
+    }
+  ],
+  "sound": "birdsong, a faint breeze, a tiny indignant huff",
+  "seconds": 9,
+  "hashtags": [
+    "#morningdew",
+    "#firsttee",
+    "#teetime",
+    "#golfbaby"
+  ],
+  "score": 7,
+  "judge": "Drool-as-dew twist is a surprising baby punchline landing last.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

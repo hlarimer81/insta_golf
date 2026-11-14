@@ -1,0 +1,38 @@
+{
+  "slug": "swing-tip-from-the-stroller",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Tag the guy who coaches from the cart.",
+  "beats": [
+    "Mulligan: You're swaying off it.",
+    "Birdie: You can't even walk.",
+    "Mulligan: I ride."
+  ],
+  "setting": "On the fairway, Mulligan sitting in a stroller parked on the grass while Birdie stands beside with a club, full-body framing with grass under them.",
+  "action": "Mulligan dishes an unsolicited tip from the stroller; Birdie flattens him.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "You're swaying off it."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You can't even walk."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "I ride."
+    }
+  ],
+  "sound": "birdsong, stroller wheels creaking, a smug giggle",
+  "seconds": 8,
+  "hashtags": [
+    "#swingtip",
+    "#cartcoach",
+    "#tagafriend",
+    "#golfbaby"
+  ],
+  "score": 7,
+  "judge": "'I ride' flips the can't-walk jab with a quick baby turn.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

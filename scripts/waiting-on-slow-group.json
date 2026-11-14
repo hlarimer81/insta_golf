@@ -1,0 +1,43 @@
+{
+  "slug": "waiting-on-slow-group",
+  "kind": "babies",
+  "style": "talk",
+  "hook": "Five minutes between every single shot.",
+  "beats": [
+    "Mulligan: We've waited twenty minutes.",
+    "Birdie: Group ahead won't move.",
+    "Mulligan: I could've napped.",
+    "Birdie: You did."
+  ],
+  "setting": "Standing on the fairway with a push cart, group visibly stalled far ahead down the fairway, full-body framing with grass under their feet.",
+  "action": "Mulligan taps his foot and sighs; Birdie delivers the flat tag.",
+  "dialogue": [
+    {
+      "speaker": "Mulligan",
+      "line": "We've waited twenty minutes."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "Group ahead won't move."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "I could've napped."
+    },
+    {
+      "speaker": "Birdie",
+      "line": "You did."
+    }
+  ],
+  "sound": "birdsong, a long bored sigh, distant chatter",
+  "seconds": 9,
+  "hashtags": [
+    "#slowplay",
+    "#paceofplay",
+    "#waitinggame",
+    "#golfbaby"
+  ],
+  "score": 7,
+  "judge": "'You did' is a tight, surprising nap callback that lands.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}

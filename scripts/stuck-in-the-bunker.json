@@ -1,0 +1,33 @@
+{
+  "slug": "stuck-in-the-bunker",
+  "kind": "babies",
+  "style": "slapstick",
+  "hook": "The bunker shot that never escapes the bunker.",
+  "beats": [
+    "Birdie: I'm climbing out.",
+    "Mulligan: We live here now."
+  ],
+  "setting": "Down inside a deep sand bunker with a high lip in front, both babies full-body on the sand.",
+  "action": "Birdie scrambles at the steep lip trying to crawl out and keeps sliding back down to the bottom. Mulligan peers over the edge from inside too, hat flopping.",
+  "dialogue": [
+    {
+      "speaker": "Birdie",
+      "line": "I'm climbing out."
+    },
+    {
+      "speaker": "Mulligan",
+      "line": "We live here now."
+    }
+  ],
+  "sound": "sliding sand, little grunts, a soft slump",
+  "seconds": 8,
+  "hashtags": [
+    "#bunkerlife",
+    "#sandtrap",
+    "#cantgetout",
+    "#shortgame"
+  ],
+  "score": 7,
+  "judge": "'We live here now' is a dark, fun surrender that fits the babies.",
+  "videoModel": "bytedance/seedance-2.0/text-to-video"
+}
