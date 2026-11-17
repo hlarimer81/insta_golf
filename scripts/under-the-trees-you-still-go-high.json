@@ -1,0 +1,25 @@
+{
+  "slug": "under-the-trees-you-still-go-high",
+  "kind": "tip",
+  "hook": "Under the trees you still try to fly it high.",
+  "beats": [
+    "Ball back, hands ahead, weight on your lead foot.",
+    "Short backswing, short follow-through, punch it low.",
+    "A clean runner beats a hero shot off a branch."
+  ],
+  "visuals": [
+    {
+      "type": "weight",
+      "lead": 65
+    },
+    null,
+    null
+  ],
+  "hashtags": [
+    "#punchshot",
+    "#recoveryshot",
+    "#coursemanagement"
+  ],
+  "brollSrc": "broll/under-the-trees-you-still-go-high.png",
+  "audioSrc": "audio/range-session.mp3"
+}

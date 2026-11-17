@@ -1,0 +1,17 @@
+{
+  "slug": "your-putt-ball-is-too-far-back",
+  "kind": "tip",
+  "hook": "Your ball sits too far back in your putting stance.",
+  "beats": [
+    "Back in your stance you hit down and skid it.",
+    "Play it just forward of center instead.",
+    "You catch it on the up and it rolls pure."
+  ],
+  "hashtags": [
+    "#putting",
+    "#puttingtips",
+    "#ballposition"
+  ],
+  "brollSrc": "broll/your-putt-ball-is-too-far-back.png",
+  "audioSrc": "audio/clubhouse.mp3"
+}
