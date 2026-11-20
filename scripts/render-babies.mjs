@@ -16,10 +16,11 @@
  * it. If this is interrupted, re-running picks the same request back up rather
  * than paying for a second one.
  *
- * Model: --model, else BABIES_VIDEO_MODEL, else FAL_VIDEO_MODEL, default
- * bytedance/seedance-2.0/text-to-video. Any fal-ai/veo3.1* endpoint also works
- * (it caps clips at 8s). A gemini-omni-* model goes to Google's Gemini API
- * instead of fal.ai (scripts/lib/omni.mjs), at about a quarter of the price.
+ * Model: --model, else BABIES_VIDEO_MODEL, else FAL_VIDEO_MODEL, else
+ * DEFAULT_VIDEO_MODEL in lib/babies.mjs (gemini-omni-1.2-flash). A gemini-omni-*
+ * model goes to Google's Gemini API (scripts/lib/omni.mjs); anything else is a
+ * fal.ai endpoint, e.g. bytedance/seedance-2.0/text-to-video (the default until
+ * 2026-11-20, at about four times the price) or fal-ai/veo3.1* (max 8s).
  *
  * --out <path> writes the clip somewhere other than out/<slug>.mp4 and leaves
  * the script's recorded videoModel alone: for trying a model on a sketch that
@@ -30,7 +31,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
-import { videoPrompt } from "./lib/babies.mjs";
+import { videoPrompt, DEFAULT_VIDEO_MODEL } from "./lib/babies.mjs";
 import { generateOmni } from "./lib/omni.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -58,10 +59,10 @@ const resolution = flag("resolution") ?? process.env.FAL_VIDEO_RESOLUTION ?? "72
 const force = args.includes("--force");
 const promptOnly = args.includes("--prompt-only");
 const model =
-  flag("model") ??
-  process.env.BABIES_VIDEO_MODEL ??
-  process.env.FAL_VIDEO_MODEL ??
-  "bytedance/seedance-2.0/text-to-video";
+  flag("model") ||
+  process.env.BABIES_VIDEO_MODEL ||
+  process.env.FAL_VIDEO_MODEL ||
+  DEFAULT_VIDEO_MODEL;
 const isGemini = model.startsWith("gemini-omni");
 const customOut = flag("out");
 if (!slug) {

@@ -22,13 +22,13 @@ on:
       # staging run, which is the only way to exercise the render path on a
       # runner while the queue is healthy. The daily schedule ignores these.
       min:
-        description: Top up when fewer than this many posts remain
+        description: Top up when fewer than this many posts remain (blank = 10)
         type: string
-        default: "7"
+        default: ""
       target:
-        description: Stage back up to this many posts
+        description: Stage back up to this many posts (blank = 20)
         type: string
-        default: "14"
+        default: ""
 
 # Action versions: the lowest that run on Node 24, not the newest available.
 # Node 20 is deprecated on runners, which is the only reason to move; every
@@ -49,11 +49,15 @@ env:
   S3_BUCKET: insta-golf-103690404054-us-east-1-an
 
 jobs:
+  # Tips were retired on 2026-11-20 for two babies Reels a day, so this job no
+  # longer stages anything; it only records the follower count. The job id
+  # stays "topup" so existing dispatches still work. ensure-queue refuses to
+  # stage tips without --allow-tips, as a second guard.
   topup:
-    name: Top up the queue
+    name: Record the follower count
     if: github.event.schedule == '0 6 * * *' || inputs.job == 'topup' || inputs.job == 'both'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -62,70 +66,24 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # Remotion renders in a headless Chrome it manages itself; this pulls it
-      # once so the first render doesn't pay for the download.
-      - name: Ensure Remotion's browser
-        run: npx remotion browser ensure
-
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       # Instagram keeps no follower history for an account this size, so the
-      # count is recorded daily or not at all. First, and allowed to fail: a
-      # Graph hiccup must not stop the queue being topped up.
+      # count is recorded daily or not at all. No longer allowed to fail
+      # quietly: it is this job's only step, and a red run here is the
+      # earliest sign the IG token has stopped working.
       - name: Record the follower count
-        continue-on-error: true
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: npm run followers
 
-      # public/audio is git-ignored, so this runner starts with no beds. They
-      # are generated rather than licensed, so regenerate them here the same
-      # way scripts/bg.mjs regenerates b-roll. Deterministic, so a Reel scored
-      # on a laptop and one scored here get the same music.
-      - name: Generate the music beds
-        run: npm run beds
-
-      - name: Top up if the queue is below a week
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FAL_KEY: ${{ secrets.FAL_KEY }}
-          # Optional override: set this repo variable to licensed track URLs
-          # to use those instead of the generated beds.
-          BOGEY_AUDIO_TRACKS: ${{ vars.BOGEY_AUDIO_TRACKS }}
-          # Via env, not interpolated into the command: a dispatch input is
-          # free text, and inlining it in a run: line is a shell injection.
-          # Empty on a schedule run, so the defaults below apply.
-          MIN: ${{ inputs.min }}
-          TARGET: ${{ inputs.target }}
-        run: npm run ensure:queue -- --min "${MIN:-7}" --target "${TARGET:-14}"
-
-      # Generated scripts must land back in the repo: the generator dedupes
-      # against scripts/, so losing them means it starts repeating itself.
-      - name: Commit any new scripts
-        run: |
-          if [ -z "$(git status --porcelain scripts/)" ]; then
-            echo "No new scripts — queue was already stocked."
-            exit 0
-          fi
-          git config user.name "insta-golf bot"
-          git config user.email "actions@github.com"
-          git add scripts/
-          git commit -m "Top up the queue
-
-          Staged automatically because the queue fell below 7 posts.
-
-          Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
-          # Nobody is watching this run, so don't fail on a repo that moved.
-          git pull --rebase origin main
-          git push
-
-  # The golf-babies lane: a second, afternoon post (20:00 UTC, picked up by the
-  # 21:00 poster firing). Its own job because each clip is minutes of fal.ai
-  # video generation, and a slow or failed render must not hold up the main
-  # top-up. Same 7/14 floor and target, counted on its own lane.
+  # The golf-babies lane, now the only one: two Reels a day, due 12:00 and
+  # 20:00 UTC (the 13:00 and 21:00 poster firings), taking the morning slot as
+  # the last queued tips post out. Clips render on Gemini Omni Flash, about a
+  # minute each. Tops up below 10 posts (5 days) back to 20 (10 days).
   babies:
     name: Top up the babies queue
     if: github.event.schedule == '0 6 * * *' || inputs.job == 'babies'
@@ -144,13 +102,16 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Top up if the babies queue is below a week
+      - name: Top up if the babies queue is below 5 days
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Only used if BABIES_VIDEO_MODEL is set back to a fal.ai model.
           FAL_KEY: ${{ secrets.FAL_KEY }}
+          BABIES_VIDEO_MODEL: ${{ vars.BABIES_VIDEO_MODEL }}
           MIN: ${{ inputs.min }}
           TARGET: ${{ inputs.target }}
-        run: npm run ensure:queue -- --lane babies --min "${MIN:-7}" --target "${TARGET:-14}"
+        run: npm run ensure:queue -- --lane babies --min "${MIN:-10}" --target "${TARGET:-20}"
 
       # Commit even when a render failed: the sketches that did render are
       # already queued, and the generator needs them in scripts/ to avoid
@@ -167,7 +128,7 @@ jobs:
           git add scripts/
           git commit -m "Top up the babies queue
 
-          Staged automatically because the babies queue fell below 7 posts.
+          Staged automatically because the babies queue fell below 10 posts.
 
           Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
           git pull --rebase origin main

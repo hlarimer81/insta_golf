@@ -5,6 +5,10 @@
  *   npm run ensure:queue                    # top up if fewer than 7 posts remain
  *   npm run ensure:queue -- --min 7 --target 14
  *   npm run ensure:queue -- --dry-run       # report only, stage nothing
+ *   npm run ensure:queue -- --lane babies   # the babies Reels (the live lane)
+ *
+ * The main (tips) lane is retired: it only reports, and stages tips again
+ * only with --allow-tips.
  *
  * Counts the posts still scheduled for the future and, when that falls below
  * --min, stages exactly enough to reach --target. It is a no-op on most runs,
@@ -78,6 +82,14 @@ if (failed.length) {
 
 if (upcoming.length >= min) {
   console.log(`At or above the floor of ${min}. Nothing to do.`);
+  process.exit(0);
+}
+
+// Tips were retired on 2026-11-20 in favour of two babies Reels a day: the
+// ones already queued post out, and the babies lane takes the morning slot
+// once they have. Running dry is now this lane's normal state, not a fault.
+if (!babies && !argv.includes("--allow-tips")) {
+  console.log("Tips are retired; not staging more (pass --allow-tips to override).");
   process.exit(0);
 }
 

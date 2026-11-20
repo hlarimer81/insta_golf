@@ -23,7 +23,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { makeS3, getJson } from "./lib/s3.mjs";
 import { fetchStats, tokenHealth, sum, avg, fetchAccount, fetchFollowerGains } from "./lib/ig-stats.mjs";
 import { loadFollowerHistory, recordFollowers, netChange } from "./lib/followers.mjs";
-import { inBabiesLane } from "./lib/babies.mjs";
+import { inBabiesLane, firingKey, POSTER_FIRINGS_UTC } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 if (existsSync(join(root, ".env"))) {
@@ -109,6 +109,22 @@ const pendingAhead = queue.entries
 const upcoming = pendingAhead.filter((e) => !inBabiesLane(e));
 const babiesUpcoming = pendingAhead.filter(inBabiesLane);
 const failed = queue.entries.filter((e) => e.status === "failed");
+
+/**
+ * Consecutive days, starting tomorrow (UTC), on which both poster firings
+ * have something due. Today is skipped: its morning firing may already have
+ * gone, which would read as a gap.
+ */
+function daysCovered(entries) {
+  const keys = new Set(entries.map((e) => firingKey(e.publishAt)));
+  let n = 0;
+  for (let d = 1; d < 400; d++) {
+    const day = new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+    if (!POSTER_FIRINGS_UTC.every((h) => keys.has(`${day}T${String(h).padStart(2, "0")}`))) break;
+    n++;
+  }
+  return n;
+}
 const health = await tokenHealth({ token, version });
 
 // Followers are what the views are for. Net change comes from the daily S3
@@ -165,9 +181,13 @@ const facts = {
     now: account.ok ? account.followers : null,
     daysOfHistory: followerHistory.length,
   },
+  // Tips are retired: this lane only drains now, so it gets no warning.
   queueRemaining: upcoming.length,
   queueThrough: upcoming.length ? upcoming[upcoming.length - 1].publishAt.slice(0, 10) : null,
   babiesQueueRemaining: babiesUpcoming.length,
+  babiesQueueThrough: babiesUpcoming.length ? babiesUpcoming[babiesUpcoming.length - 1].publishAt.slice(0, 10) : null,
+  // Days ahead with both posts covered, either lane: the real runway at two a day.
+  daysCovered: daysCovered(pendingAhead),
   failedEntries: failed.map((e) => e.slug),
   tokenDataAccessDaysLeft: health.dataAccessExpiresInDays,
   tokenDataAccessExpiresOn: health.dataAccessExpiresOn,
@@ -191,14 +211,18 @@ try {
       "views), posting twice a day split reach rather than adding it, and jokes and tips " +
       "perform about the same. Engagement has been near zero across the account's life, so " +
       "treat a single save or share as genuinely notable. " +
-      "Cadence: this account publishes once a day, every day. Never read a difference in " +
+      "Cadence: two posts a day, every day: a morning post and an afternoon golf-babies AI " +
+      "video Reel (since 2026-10-28). The morning post was a golf tip; tips were retired on " +
+      "2026-11-20 and the last one is due 2026-12-01, after which both daily posts are " +
+      "babies Reels. Babies clips render on Gemini Omni Flash from 2026-11-21 (were Seedance " +
+      "on fal.ai); the owner judged the new takes clearly better. Read the tips-to-babies " +
+      "switch as a content change when comparing windows across it. Never read a difference in " +
       "post count between the two windows as a cadence change — it almost always means days " +
       "were missed because the queue drained or a publish failed. `silentDays` lists the " +
-      "dates in each window with no post, and `postsPerActiveDay` stays near 1.0 whenever " +
+      "dates in each window with no post, and `postsPerActiveDay` stays near 2.0 whenever " +
       "the schedule is intact; only call cadence changed if that number moved. If the prior " +
       "window has silent days, say plainly that the comparison is against a partial week " +
-      "instead of reporting the rise as growth. Never suggest cutting back to one post a " +
-      "day — that is already the schedule. " +
+      "instead of reporting the rise as growth. " +
       "Views keep accumulating for about a week after a post. `counted` (posts 7–13 days " +
       "old) and `countedPrior` (14–20 days old) have settled, so compare views only between " +
       "those two. `fresh` is the last 7 days: its views are still climbing, so never compare " +
@@ -224,8 +248,13 @@ try {
 
 // ---- format ---------------------------------------------------------------
 const warn = [];
-if (facts.queueRemaining < 7)
-  warn.push(`Queue is down to ${facts.queueRemaining} post(s) — through ${facts.queueThrough}.`);
+// The babies top-up refills below 10 posts (5 days), so under 4 days means it
+// has missed at least a day.
+if (facts.daysCovered < 4)
+  warn.push(
+    `Only ${facts.daysCovered} day(s) ahead have both posts queued ` +
+      `(${facts.babiesQueueRemaining} babies Reel(s) through ${facts.babiesQueueThrough ?? "—"}).`,
+  );
 if (facts.failedEntries.length)
   warn.push(`Failed to publish: ${facts.failedEntries.join(", ")}.`);
 if (facts.fresh.silentDays.length)
@@ -269,7 +298,8 @@ const notes = [
   ...(facts.worst && facts.worst.slug !== facts.best?.slug
     ? [`Weakest: ${facts.worst.slug} (${facts.worst.views} views)`]
     : []),
-  `Queue: ${facts.queueRemaining} posts through ${facts.queueThrough ?? "—"}, plus ${facts.babiesQueueRemaining} babies Reel(s).`,
+  `Queue: ${facts.daysCovered} day(s) fully covered — ${facts.babiesQueueRemaining} babies Reel(s) through ${facts.babiesQueueThrough ?? "—"}` +
+    (facts.queueRemaining ? `, plus the last ${facts.queueRemaining} tip(s) through ${facts.queueThrough}.` : "."),
 ];
 
 // [label, settled week, week before] — one table for the email and the issue.

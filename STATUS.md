@@ -146,22 +146,36 @@ decline. The Oct 16 report called that "a real decline" when the newest posts
 were hours old. Views are now compared between posts 7–13 and 14–20 days old;
 the latest week is reported only as "so far".
 
-## Golf babies: a second, afternoon post (2026-10-28)
+## Golf babies: the whole account from 2026-12-02
 
-AI video Reels of two babies, Birdie and Mulligan, doing golf comedy — one a
-day, due 20:00 UTC and posted by the 21:00 firing (4–5pm Eastern), alongside
-the morning tip. Styles alternate: slapstick (a fall, the hat over the eyes,
+AI video Reels of two babies, Birdie and Mulligan, doing golf comedy. Started
+2026-10-28 as a second, afternoon post beside the morning tip. **Tips were
+retired on 2026-11-20**: the ones already queued post out (the last is due
+Dec 1), nothing restocks them, and from Dec 2 both daily posts are babies
+Reels, due 12:00 and 20:00 UTC (the 13:00 and 21:00 firings: 8am and 4pm
+Eastern in winter). Styles alternate: slapstick (a fall, the hat over the eyes,
 then a one-word tag) and talk (a golf-guy brag undercut by being a baby).
 
-- **Own lane.** Queue entries carry `lane: "babies"`. The main top-up,
-  `stage:week` and the report's queue-depth warning all ignore it; the
-  `babies` job tops it up to 14 when under 7, on the same 06:00 run.
+- **Slots, not days.** `stage:babies` puts each Reel in the earliest open
+  12:00 or 20:00 slot, a slot being taken when anything in either lane is due
+  for that firing. So babies take the mornings exactly as the tips run out,
+  and fill any morning a failed or missing tip left open.
+- **Own lane, now the live one.** Queue entries carry `lane: "babies"`. The
+  `babies` job tops it up to 20 when under 10 (10 days / 5 days at two a
+  day). `ensure:queue` on the main lane only reports; it stages tips again
+  only with `--allow-tips`, and the `topup` job now just records followers.
 - **No review gate.** Claude writes 12 sketches per style, a second call judges
-  them, the best go straight to fal.ai (Seedance 2.0, 720p) and the queue. The
-  owner reviews them on Instagram and tunes the prompts in `scripts/babies.mjs`.
-- **Cost: ~$0.30 per second of video, ~$2.70 a clip, ~$80 a month.** By far
-  the most expensive thing this project runs. A failed render is skipped, not
-  retried, and turns the job red.
+  them, the best go straight to video and the queue. The owner reviews them on
+  Instagram and tunes the prompts in `scripts/babies.mjs`.
+- **Rendered on Gemini Omni Flash (720p) since 2026-11-20**, was Seedance 2.0
+  on fal.ai. Three trial takes of already-posted sketches were judged clearly
+  better by the owner, and each rendered in under a minute against several on
+  fal.ai. Set the repo variable `BABIES_VIDEO_MODEL` to a fal.ai model to go
+  back; nothing else changes.
+- **Cost: ~$0.07 per second, ~$0.60 a clip, ~$36 a month at two a day** (was
+  ~$0.30/s and ~$80 a month at one a day on Seedance). The per-second rate is
+  derived from Google's per-token price, so check it against the first bill.
+  A failed render is skipped, not retried, and turns the job red.
 - **This goes against the August finding** that a second daily post split
   reach rather than adding to it. That was two of the same format; this is a
   different one, by the owner's choice. Watch whether the morning posts lose
@@ -259,6 +273,8 @@ was empty, confirming the generated beds are found without hosted URLs.
 The dispatch inputs stay useful: `min` above the number already queued forces a
 real render whenever the path needs re-proving, and the daily schedule ignores
 them at 7/14. Keep `job` on `topup` — `both` also sends a report email.
+_(Since 2026-11-20 `topup` stages nothing — tips are retired — so a render
+re-proof now means dispatching `babies` with `min` above the queued count.)_
 
 **A failed post leaves a silent hole.** The poster marks an entry `failed` and
 moves on; `ensure-queue` reports failures but doesn't backfill the lost day. The
@@ -286,7 +302,7 @@ trusting the release title — that is the field the runner actually reads.
 
 ## Costs
 
-Negligible: roughly 7 Claude generations plus ~$0.20 of fal.ai images per
-top-up, one Claude call for the weekly read, and ~60 of GitHub's 2,000 free
+The babies videos (~$36 a month, above) are the only real cost. Otherwise
+negligible: Claude sketch-writing on each babies top-up, one Claude call for the weekly read, and ~60 of GitHub's 2,000 free
 Actions minutes a month. The music beds are synthesized locally and cost
 nothing.

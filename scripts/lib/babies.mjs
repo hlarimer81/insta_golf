@@ -56,3 +56,59 @@ export function videoPrompt(sketch) {
  */
 export const BABIES_LANE = "babies";
 export const inBabiesLane = (entry) => entry.lane === BABIES_LANE;
+
+/**
+ * The video model babies clips render on unless BABIES_VIDEO_MODEL (or the
+ * older FAL_VIDEO_MODEL) says otherwise. Omni Flash since 2026-11-20: about a
+ * quarter of Seedance's price, and the owner judged the first three takes
+ * clearly better.
+ */
+export const DEFAULT_VIDEO_MODEL = "gemini-omni-1.2-flash";
+
+/**
+ * UTC hours the poster Lambda fires (template.yaml: cron(0 13,21 * * ? *)).
+ * It publishes one post per firing, oldest due first.
+ */
+export const POSTER_FIRINGS_UTC = [13, 21];
+
+/**
+ * Which firing will publish a post due at `when`: "YYYY-MM-DDTHH" of the
+ * first firing at or after it. Two entries with the same key compete for one
+ * firing, and the loser pushes everything after it back a slot.
+ */
+export function firingKey(when) {
+  const t = new Date(when);
+  for (let d = 0; d < 2; d++) {
+    for (const h of POSTER_FIRINGS_UTC) {
+      const f = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() + d, h));
+      if (f >= t) return f.toISOString().slice(0, 13);
+    }
+  }
+}
+
+/**
+ * The first `count` open posting slots, earliest first, as Dates.
+ *
+ * A slot is open when nothing in the queue, in either lane, is due for the
+ * firing that would publish it. Failed entries don't hold one: they will
+ * never post. Gaps are filled: the morning slots after the last tip open up
+ * before the end of the afternoon run already queued, and they are exactly
+ * what has to be filled. Nothing is placed sooner than 12 hours out, so a
+ * fresh render is never due at the very next firing.
+ */
+export function openSlots(entries, count, slotHours = [12, 20], now = Date.now()) {
+  const taken = new Set(entries.filter((e) => e.status !== "failed").map((e) => firingKey(e.publishAt)));
+  const floor = now + 12 * 3600 * 1000;
+  const slots = [];
+  for (let day = new Date(floor); slots.length < count; day = new Date(day.getTime() + 86400000)) {
+    for (const h of slotHours) {
+      const when = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), h));
+      const key = firingKey(when);
+      if (when.getTime() < floor || taken.has(key)) continue;
+      taken.add(key);
+      slots.push(when);
+      if (slots.length === count) break;
+    }
+  }
+  return slots;
+}

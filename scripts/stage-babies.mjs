@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Stage golf-babies Reels into their own afternoon lane of the cloud queue:
- * write sketches, render them on fal.ai, and enqueue one per day.
+ * Stage golf-babies Reels into the cloud queue: write sketches, render them
+ * (Gemini Omni Flash by default, see render-babies.mjs), and enqueue each into
+ * the earliest open posting slot.
  *
  *   npm run stage:babies                     # 7 Reels
  *   npm run stage:babies -- --count 14
@@ -10,27 +11,34 @@
  * Options:
  *   --count N        Reels to stage (default 7)
  *   --topic "..."    sketch topic (default: babies.mjs's weekend-golf misery)
- *   --utc-hour H     hour (UTC) each one is due (default 20). The poster fires
- *                    at 13:00 and 21:00 UTC, so 20:00 is picked up at 21:00:
- *                    5pm Eastern in summer, 4pm in winter. The morning post is
- *                    due at 12:00 and goes at 13:00, so the two never compete.
+ *   --slots H,H      UTC hours a babies Reel may be due (default 12,20). The
+ *                    poster fires at 13:00 and 21:00 UTC, so 12:00 goes at
+ *                    13:00 (8am Eastern in winter) and 20:00 at 21:00 (4pm).
  *   --concurrency N  renders in flight at once (default 3)
  *
- * Styles alternate day by day — talk, slapstick, talk — continuing from
+ * Two a day, once the tips run out. A slot counts as taken when anything, tip
+ * or baby, is due for the poster firing that would publish it, so babies fill
+ * the 20:00 slots alongside the remaining morning tips and only take the
+ * mornings once those have posted. The poster publishes one post per firing,
+ * so two posts due for the same firing would push every later post back a
+ * slot; keying by firing rather than exact time rules that out.
+ *
+ * Styles alternate post by post — talk, slapstick, talk — continuing from
  * whatever the last queued babies Reel was. Each style is written as its own
  * batch so the judge in babies.mjs ranks talk against talk and falls against
  * falls; mixed together, the falls lose.
  *
  * There is no review gate: sketches go straight to video, and the owner
- * reviews them on Instagram. Each render costs real money (~$0.30/second on
- * Seedance 720p), which is why a failed render is skipped rather than retried.
+ * reviews them on Instagram. Each render costs real money (~$0.07/second on
+ * Omni Flash 720p, ~$0.30 on Seedance), which is why a failed render is
+ * skipped rather than retried.
  */
 import { spawn, spawnSync } from "node:child_process";
 import { readdirSync, existsSync, renameSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { makeS3, getJson } from "./lib/s3.mjs";
-import { inBabiesLane } from "./lib/babies.mjs";
+import { inBabiesLane, DEFAULT_VIDEO_MODEL, openSlots } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -43,7 +51,11 @@ if (existsSync(join(root, ".env"))) {
     /* ignore */
   }
 }
-for (const k of ["AWS_REGION", "S3_BUCKET", "ANTHROPIC_API_KEY", "FAL_KEY"]) {
+// The same default render-babies.mjs uses, so the key checked here is the
+// one the renders will need.
+const videoModel = process.env.BABIES_VIDEO_MODEL || process.env.FAL_VIDEO_MODEL || DEFAULT_VIDEO_MODEL;
+const videoKey = videoModel.startsWith("gemini-omni") ? "GEMINI_API_KEY" : "FAL_KEY";
+for (const k of ["AWS_REGION", "S3_BUCKET", "ANTHROPIC_API_KEY", videoKey]) {
   if (!process.env[k]) {
     console.error(`Missing ${k}. See .env.example.`);
     process.exit(1);
@@ -58,7 +70,14 @@ const opt = (name, def) => {
 };
 const count = parseInt(opt("count", "7"), 10);
 const topic = opt("topic", null);
-const utcHour = parseInt(opt("utc-hour", "20"), 10);
+const slotHours = opt("slots", "12,20")
+  .split(",")
+  .map((h) => parseInt(h, 10))
+  .sort((a, b) => a - b);
+if (!slotHours.length || slotHours.some((h) => !(h >= 0 && h <= 23))) {
+  console.error("--slots must be comma-separated UTC hours, e.g. 12,20.");
+  process.exit(1);
+}
 const concurrency = parseInt(opt("concurrency", "3"), 10);
 if (!(count >= 1)) {
   console.error("--count must be a positive integer.");
@@ -138,19 +157,13 @@ if (plan.length === 0) {
   process.exit(1);
 }
 
-let start = last ? new Date(new Date(last.publishAt).getTime() + 86400000) : new Date(Date.now() + 86400000);
-const tomorrow = new Date(Date.now() + 86400000);
-// A lane that ran dry would otherwise schedule into the past, and every post
-// would be due at the next firing.
-if (start < tomorrow) start = tomorrow;
-start.setUTCHours(utcHour, 0, 0, 0);
+const slots = openSlots(queue.entries, plan.length, slotHours);
 
 console.log("\n③ Enqueuing…\n");
 plan.forEach((slug, i) => {
-  const when = new Date(start);
-  when.setUTCDate(start.getUTCDate() + i);
+  const when = slots[i];
   const { style } = JSON.parse(readFileSync(join(scriptsDir, `${slug}.json`), "utf8"));
-  console.log(`   👶 ${when.toISOString().slice(0, 10)}  ${style.padEnd(9)} ${slug}`);
+  console.log(`   👶 ${when.toISOString().slice(0, 16).replace("T", " ")}  ${style.padEnd(9)} ${slug}`);
   run(["scripts/enqueue.mjs", slug, "--at", when.toISOString()]);
 });
 
