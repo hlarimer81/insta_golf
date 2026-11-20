@@ -1,35 +1,48 @@
 # insta-golf — status
 
-_Last updated: 2026-10-28_
+_Last updated: 2026-11-20_
 
-## ⚠️ Action required: roll the Instagram credential
+## The Instagram credential: next roll by 2027-02-18
 
-**The token's data access expires 2026-11-17 — 56 days out.**
+**Rolled 2026-11-20. Data access now expires 2027-02-18**; the weekly report
+starts warning on **2027-01-28**. Roll it then, don't wait for the date.
 
 The token itself is a PAGE token and never expires, so nothing looks wrong until
-the day it stops. When data access lapses, insights reads and publishing both
-fail and **nothing announces it** — the account simply goes quiet, which is the
-exact failure this project was automated to prevent.
+the day it stops. When data access lapses, insights reads and publishing are
+expected to fail and **nothing announces it**. In practice the old token was
+still reading and posting three days past its 2026-11-17 date, which shows
+Meta enforces this loosely, not that it never will.
 
 This is the one thing here that cannot be automated away: re-authorization needs
-a human at the Graph API Explorer.
+a human at the Graph API Explorer. `APP_ID` and `APP_SECRET` are now in the
+local `.env`, so the exchange runs from this machine.
 
 To roll it:
 
-1. Graph API Explorer → your app (**Bogey Golf**) → **Generate Access Token**.
-2. Keep every scope currently on it, or insights will silently degrade:
-   `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights`,
-   `pages_show_list`, `pages_read_engagement`, `business_management`.
-3. Exchange for a long-lived token, then a page token.
-4. Update it in **both** places — they are separate copies:
-   - `.env` → `IG_ACCESS_TOKEN` (local CLI use)
-   - GitHub → repo secret `IG_ACCESS_TOKEN` (the weekly report)
-   - Secrets Manager `insta-golf/ig-token` (the poster Lambda — this is the one
-     that actually publishes; miss it and posting stops even if stats work)
-5. Confirm with `npm run stats` — it prints a warning inside 21 days of expiry.
-
-The weekly report carries the countdown and starts warning at 21 days, so it
-will nag from **2026-10-27**. Don't wait for that.
+1. Graph API Explorer → your app (**Bogey Golf**) → **User Token** →
+   **Generate Access Token**, with every scope, or insights will silently
+   degrade: `instagram_basic`, `instagram_content_publish`,
+   `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`,
+   `business_management`. In the login popup, "Continue as…" keeps the Page
+   and Instagram account selected last time; **never untick them** under
+   "Edit previous settings", which revokes the app's access to them for every
+   token, old ones included.
+2. Exchange it for a page token, written to `.env`. `ig:setup` prompts on
+   stdin, which a Claude Code `!` command can't answer, so either run it in a
+   real terminal or feed it from a file:
+   `nano .ig-token` (paste) then `npm run ig:setup < .ig-token; rm -f .ig-token`.
+3. **Check the result before copying it anywhere.** Paste a token issued
+   earlier and the exchange succeeds anyway but hands back the old expiry; that
+   happened on the first try on 2026-11-20. Run `npm run stats`, or ask Claude
+   to debug_token the `.env` token, and confirm data access is ~90 days out.
+4. Copy `IG_ACCESS_TOKEN` from `.env` into the two cloud copies, by hand
+   (the local GitHub PAT can't write secrets and there's no AWS CLI here):
+   - GitHub → repo secret `IG_ACCESS_TOKEN` (followers + the weekly report)
+   - Secrets Manager `insta-golf/ig-token`, us-east-1, keeping its existing
+     format (the poster Lambda — this is the one that actually publishes; miss
+     it and posting stops even if stats work)
+5. Confirm the GitHub copy by dispatching `topup` with `min: 0` (records
+   followers, stages nothing), and the Lambda copy by the next post going out.
 
 ## Where things stand
 
