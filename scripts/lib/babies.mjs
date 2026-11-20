@@ -41,6 +41,17 @@ export function videoPrompt(sketch) {
     "At most one golf hole appears anywhere in the video, never two.",
     "Golf tees are only ever pushed into the grass on the tee box, never in the hole.",
     `Action: ${sentence(sketch.action)}`,
+    // Comic timing, beat by beat. Left to itself the video model rushes the
+    // pause and cuts the reaction short, and those are where the laugh is.
+    // Sketches written before 2026-11-20 have no timeline and skip this.
+    ...(sketch.timeline?.length
+      ? [
+          `Timing, second by second: ${sketch.timeline
+            .map((b) => `${b.from}-${b.to}s: ${sentence(b.what)}`)
+            .join(" ")}`,
+          "Play every pause at full length, and hold the final reaction until the very last frame.",
+        ]
+      : []),
     `Dialogue, spoken clearly in cute baby voices with accurate lip sync: ${lines}`,
     `Sound: ${sentence(sketch.sound)}`,
     "Lighthearted, wholesome comedy. The babies are safe, happy and unhurt throughout.",
@@ -54,6 +65,23 @@ export function videoPrompt(sketch) {
  * is the main daily post. Counting or scheduling one lane must ignore the
  * other, or a long babies queue would look like a full main queue.
  */
+/**
+ * Two slapstick Reels for every talk Reel, continuing from the styles already
+ * queued (oldest first). Since 2026-11-20: on the first ~18 babies posts the
+ * falls were watched nearly to the end (7.4-9.5s of ~8.5s clips) and the talk
+ * sketches lost viewers around 5s.
+ */
+export function nextStyles(history, n) {
+  const seq = [...history];
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const style = seq.at(-1) === "slapstick" && seq.at(-2) === "slapstick" ? "talk" : "slapstick";
+    seq.push(style);
+    out.push(style);
+  }
+  return out;
+}
+
 export const BABIES_LANE = "babies";
 export const inBabiesLane = (entry) => entry.lane === BABIES_LANE;
 

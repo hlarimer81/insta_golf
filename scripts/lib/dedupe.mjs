@@ -38,8 +38,11 @@ const tokens = (s) =>
     .split(/\s+/)
     .filter((w) => w && w.length > 2 && !STOP.has(w));
 
-/** Full text of a script: the hook carries the claim, the beats carry the advice. */
-export const scriptText = (s) => [s.hook, ...(s.beats ?? [])].join(" ");
+/**
+ * Full text of a script: the hook carries the claim, the beats carry the advice.
+ * A babies sketch's gag is in its action, so that counts too; tips have none.
+ */
+export const scriptText = (s) => [s.hook, ...(s.beats ?? []), s.action ?? ""].join(" ");
 
 /**
  * Term-frequency cosine over the whole script. Numbers survive tokenizing on
@@ -105,6 +108,9 @@ export async function judgeDuplicates({
   shortlistSize = 5,
   batchSize = 8,
   onBatch = null,
+  // Overrides the tips-screening prompt, e.g. for babies sketches, where the
+  // repeat is a gag rather than advice. Must ask for the same JSON reply.
+  system = null,
 }) {
   if (candidates.length === 0) return [];
 
@@ -125,6 +131,7 @@ export async function judgeDuplicates({
           model,
           shortlistSize,
           batchSize,
+          system,
         })),
       );
     }
@@ -135,10 +142,12 @@ export async function judgeDuplicates({
     slug: c.slug,
     hook: c.hook,
     beats: c.beats,
+    ...(c.action ? { action: c.action } : {}),
     compare_against: shortlist(c, corpus, shortlistSize).map((s) => ({
       slug: s.slug,
       hook: s.hook,
       beats: s.beats,
+      ...(s.action ? { action: s.action } : {}),
       already_posted: Boolean(s.postedAt),
       posted_on: s.postedAt ?? null,
     })),
@@ -147,7 +156,7 @@ export async function judgeDuplicates({
   const msg = await client.messages.create({
     model,
     max_tokens: Math.min(16000, 4000 + candidates.length * 1500),
-    system:
+    system: system ??
       "You screen scripts for a golf Instagram account that posts one short tip a day. " +
       "For each candidate, decide whether it gives ADVICE the account has already given. " +
       "Judge the substance, not the wording: two scripts that both say 'pick a landing spot " +
@@ -175,8 +184,8 @@ export async function judgeDuplicates({
     if (msg.stop_reason === "max_tokens" && candidates.length > 1) {
       const half = Math.ceil(candidates.length / 2);
       return [
-        ...(await judgeDuplicates({ client, candidates: candidates.slice(0, half), corpus, model, shortlistSize, batchSize: half })),
-        ...(await judgeDuplicates({ client, candidates: candidates.slice(half), corpus, model, shortlistSize, batchSize: half })),
+        ...(await judgeDuplicates({ client, candidates: candidates.slice(0, half), corpus, model, shortlistSize, batchSize: half, system })),
+        ...(await judgeDuplicates({ client, candidates: candidates.slice(half), corpus, model, shortlistSize, batchSize: half, system })),
       ];
     }
     // A judge we can't parse must not silently pass everything through.

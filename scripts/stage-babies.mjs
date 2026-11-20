@@ -23,8 +23,9 @@
  * so two posts due for the same firing would push every later post back a
  * slot; keying by firing rather than exact time rules that out.
  *
- * Styles alternate post by post — talk, slapstick, talk — continuing from
- * whatever the last queued babies Reel was. Each style is written as its own
+ * Two slapstick for every talk sketch (nextStyles in lib/babies.mjs: the falls
+ * hold viewers, the talk loses them), continuing the pattern from the babies
+ * Reels already queued. Each style is written as its own
  * batch so the judge in babies.mjs ranks talk against talk and falls against
  * falls; mixed together, the falls lose.
  *
@@ -38,7 +39,7 @@ import { readdirSync, existsSync, renameSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { makeS3, getJson } from "./lib/s3.mjs";
-import { inBabiesLane, DEFAULT_VIDEO_MODEL, openSlots } from "./lib/babies.mjs";
+import { inBabiesLane, DEFAULT_VIDEO_MODEL, openSlots, nextStyles } from "./lib/babies.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -101,12 +102,8 @@ const queue = (await getJson(s3, {
 const lane = queue.entries
   .filter((e) => inBabiesLane(e) && e.status !== "failed")
   .sort((a, b) => a.publishAt.localeCompare(b.publishAt));
-const last = lane.at(-1);
 
-// Slapstick first on a fresh lane: the falls are the part the owner liked.
-const STYLES = ["slapstick", "talk"];
-const firstStyle = last?.style === "slapstick" ? "talk" : "slapstick";
-const order = Array.from({ length: count }, (_, i) => STYLES[(STYLES.indexOf(firstStyle) + i) % 2]);
+const order = nextStyles(lane.map((e) => e.style).filter(Boolean), count);
 const want = { talk: order.filter((s) => s === "talk").length, slapstick: order.filter((s) => s === "slapstick").length };
 
 // ---- 2. write each style's sketches and approve them ----------------------
