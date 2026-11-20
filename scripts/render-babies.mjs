@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * Turn an approved golf-babies sketch into a video with fal.ai.
+ * Turn an approved golf-babies sketch into a video with fal.ai or Gemini.
  *
  *   npm run render:babies -- <slug>
  *   npm run render:babies -- <slug> --resolution 1080p
  *   npm run render:babies -- <slug> --force        # pay for a fresh take
  *   npm run render:babies -- <slug> --prompt-only  # print the prompt, spend nothing
+ *   npm run render:babies -- <slug> --model gemini-omni-1.2-flash --out out/omni/<slug>.mp4
  *
  * Writes out/<slug>.mp4 — the same place `npm run render` puts a Reel — so the
  * clip enqueues exactly like one:  npm run enqueue -- <slug> --at <ISO>
@@ -15,15 +16,22 @@
  * it. If this is interrupted, re-running picks the same request back up rather
  * than paying for a second one.
  *
- * Model: FAL_VIDEO_MODEL, default bytedance/seedance-2.0/text-to-video. Any
- * fal-ai/veo3.1* endpoint also works (it caps clips at 8s).
+ * Model: --model, else BABIES_VIDEO_MODEL, else FAL_VIDEO_MODEL, default
+ * bytedance/seedance-2.0/text-to-video. Any fal-ai/veo3.1* endpoint also works
+ * (it caps clips at 8s). A gemini-omni-* model goes to Google's Gemini API
+ * instead of fal.ai (scripts/lib/omni.mjs), at about a quarter of the price.
  *
- * Requires FAL_KEY in .env.
+ * --out <path> writes the clip somewhere other than out/<slug>.mp4 and leaves
+ * the script's recorded videoModel alone: for trying a model on a sketch that
+ * is already rendered and queued, without touching the queued take.
+ *
+ * Requires FAL_KEY in .env, or GEMINI_API_KEY for a gemini-omni-* model.
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { videoPrompt } from "./lib/babies.mjs";
+import { generateOmni } from "./lib/omni.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const scriptsDir = join(root, "scripts");
@@ -39,13 +47,27 @@ if (existsSync(join(root, ".env"))) {
 
 // ---- args -----------------------------------------------------------------
 const args = process.argv.slice(2);
-const slug = args.find((a) => !a.startsWith("--"));
-const rIdx = args.indexOf("--resolution");
-const resolution = rIdx >= 0 ? args[rIdx + 1] : process.env.FAL_VIDEO_RESOLUTION ?? "720p";
+const flag = (name) => {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+// The first bare argument that isn't a flag's value.
+const valued = new Set(["--resolution", "--model", "--out"]);
+const slug = args.find((a, i) => !a.startsWith("--") && !valued.has(args[i - 1]));
+const resolution = flag("resolution") ?? process.env.FAL_VIDEO_RESOLUTION ?? "720p";
 const force = args.includes("--force");
 const promptOnly = args.includes("--prompt-only");
+const model =
+  flag("model") ??
+  process.env.BABIES_VIDEO_MODEL ??
+  process.env.FAL_VIDEO_MODEL ??
+  "bytedance/seedance-2.0/text-to-video";
+const isGemini = model.startsWith("gemini-omni");
+const customOut = flag("out");
 if (!slug) {
-  console.error("Usage: npm run render:babies -- <slug> [--resolution 720p|1080p] [--force] [--prompt-only]");
+  console.error(
+    "Usage: npm run render:babies -- <slug> [--resolution 720p|1080p] [--model M] [--out PATH] [--force] [--prompt-only]",
+  );
   process.exit(1);
 }
 
@@ -71,18 +93,86 @@ if (promptOnly) {
   console.log(prompt);
   process.exit(0);
 }
-if (!process.env.FAL_KEY) {
-  console.error("FAL_KEY is not set in .env. Get a key at https://fal.ai and add:\n  FAL_KEY=...");
+if (isGemini ? !process.env.GEMINI_API_KEY : !process.env.FAL_KEY) {
+  console.error(
+    isGemini
+      ? "GEMINI_API_KEY is not set in .env. Make one at https://aistudio.google.com/apikey and add:\n  GEMINI_API_KEY=..."
+      : "FAL_KEY is not set in .env. Get a key at https://fal.ai and add:\n  FAL_KEY=...",
+  );
   process.exit(1);
 }
 
-const outPath = join(outDir, `${slug}.mp4`);
+const outPath = customOut ? resolve(customOut) : join(outDir, `${slug}.mp4`);
 if (existsSync(outPath) && !force) {
-  console.log(`out/${slug}.mp4 already exists. Pass --force to generate (and pay for) a new take.`);
+  console.log(`${outPath} already exists. Pass --force to generate (and pay for) a new take.`);
   process.exit(0);
 }
 
-const model = process.env.FAL_VIDEO_MODEL ?? "bytedance/seedance-2.0/text-to-video";
+// ---- Gemini Omni Flash ----------------------------------------------------
+if (isGemini) {
+  // Where an in-flight interaction id is kept, so an interrupted run resumes
+  // instead of paying twice: on the script for a real render, beside the
+  // output for an --out trial, so a trial never edits a queued script.
+  const reqPath = `${outPath}.request.json`;
+  const saved = customOut
+    ? existsSync(reqPath) && JSON.parse(readFileSync(reqPath, "utf8"))
+    : sketch.geminiRequest;
+  const resume = !force && saved?.model === model ? saved.id : undefined;
+  const record = (req) => {
+    if (customOut) {
+      if (req) writeFileSync(reqPath, JSON.stringify(req) + "\n");
+      else if (existsSync(reqPath)) unlinkSync(reqPath);
+      return;
+    }
+    if (req) sketch.geminiRequest = req;
+    else delete sketch.geminiRequest;
+    writeFileSync(scriptPath, JSON.stringify(sketch, null, 2) + "\n");
+  };
+
+  console.log(
+    resume
+      ? `↻  Resuming Gemini interaction ${resume} for "${slug}"…`
+      : `👶👶  Generating "${slug}" (${sketch.seconds}s, ${resolution}) via ${model}…`,
+  );
+  mkdirSync(dirname(outPath), { recursive: true });
+  const started = Date.now();
+  let mp4;
+  try {
+    mp4 = await generateOmni({
+      key: process.env.GEMINI_API_KEY,
+      model,
+      prompt,
+      seconds: sketch.seconds,
+      resolution,
+      resume,
+      onSubmit: (id) => record({ model, id }),
+    });
+  } catch (err) {
+    // A timeout is worth resuming; anything else is dead, so clear it.
+    if (!err.resumable) record(null);
+    console.error(`Gemini generation failed: ${err.message}`);
+    if (/RESOURCE_EXHAUSTED/.test(err.message)) {
+      console.error(
+        "The key's Google project has no quota for this model: Omni Flash has no free tier, so\n" +
+          "billing must be on (aistudio.google.com → the key's project → Set up billing), or a\n" +
+          "rate/spend limit was hit. Nothing was charged.",
+      );
+    } else if (!err.resumable) {
+      console.error("Edit the sketch's setting/action/dialogue if it was refused, then re-run.");
+    }
+    process.exit(1);
+  }
+  writeFileSync(outPath, mp4);
+  record(null);
+  if (!customOut) {
+    sketch.videoModel = model;
+    writeFileSync(scriptPath, JSON.stringify(sketch, null, 2) + "\n");
+  }
+  const secs = Math.round((Date.now() - started) / 1000);
+  console.log(`✅  Saved ${outPath} (${(mp4.length / 1e6).toFixed(1)} MB, ${secs}s) — watch it before you queue it.`);
+  process.exit(0);
+}
+
 const headers = { Authorization: `Key ${process.env.FAL_KEY}`, "Content-Type": "application/json" };
 
 // The two families take duration differently: Seedance wants "4".."15", Veo
